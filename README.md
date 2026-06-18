@@ -1,4 +1,4 @@
-# Perfect Day Prototype v0.13
+# Perfect Day Prototype v0.14
 
 ## New in v0.8
 
@@ -59,9 +59,10 @@ Do not double-click `index.html`; the local server has to be running.
 - On mobile, the download button uses the native share sheet when supported, which can save to Photos/Camera Roll.
 - If a city returns broken/missing NWS data, the game automatically re-spins without using the player's region/city re-spin.
 
-## v0.13 changes
+## v0.14 changes
 
-- Actually changed the playable draft from 10 slots to 7 slots.
-- Removed Feels Like, Humidity, and Sunset as standalone draft attributes.
-- Temperature now includes Feels Like underneath.
-- Dew Point now includes RH underneath.
+- Clean fix from the last working build.
+- Game now actually uses 7 draft slots.
+- Temperature card includes Feels Like underneath.
+- Dew Point card includes RH underneath.
+- Removed Feels Like, Humidity, and Sunset from the playable draft board.
