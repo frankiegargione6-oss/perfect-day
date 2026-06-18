@@ -585,7 +585,6 @@ const slots = [
   "Temperature",
   "Dew Point",
   "Wind Speed",
-  "Wind Direction",
   "Sky Cover",
   "Visibility",
   "Pressure"
@@ -1087,12 +1086,104 @@ function makePlayableValues(values) {
     output["Dew Point"] = dew;
   }
 
-  ["Wind Speed", "Wind Direction", "Sky Cover", "Visibility", "Pressure"].forEach(key => {
+  ["Wind Speed", "Sky Cover", "Visibility", "Pressure"].forEach(key => {
     if (values[key]) output[key] = values[key];
   });
 
   return output;
 }
+
+function numericValue(text) {
+  const match = String(text || "").match(/-?\d+(\.\d+)?/);
+  return match ? Number(match[0]) : null;
+}
+
+function scoreRange(value, bands, fallback = 0) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return fallback;
+  for (const band of bands) {
+    if (value >= band.min && value <= band.max) return band.points;
+  }
+  return fallback;
+}
+
+function scoreSky(value) {
+  const text = String(value || "").toLowerCase();
+  if (text.includes("thunder") || text.includes("rain") || text.includes("snow") || text.includes("fog") || text.includes("mist") || text.includes("haze")) return 0;
+  if (text.includes("clear") || text.includes("sunny")) return 15;
+  if (text.includes("few")) return 14;
+  if (text.includes("mostly sunny")) return 13;
+  if (text.includes("partly")) return 11;
+  if (text.includes("mostly cloudy") || text.includes("broken")) return 7;
+  if (text.includes("overcast")) return 2;
+  return 8;
+}
+
+function scoreVisibility(value) {
+  const text = String(value || "").toLowerCase();
+  const vis = numericValue(text);
+  if (text.includes("+") || vis >= 10) return 15;
+  return scoreRange(vis, [
+    { min: 8, max: 9.99, points: 13 },
+    { min: 6, max: 7.99, points: 10 },
+    { min: 4, max: 5.99, points: 6 },
+    { min: 2, max: 3.99, points: 3 },
+    { min: 0, max: 1.99, points: 0 }
+  ]);
+}
+
+function calculateEverydayScore() {
+  const breakdown = {};
+
+  const temp = numericValue(build["Temperature"]?.value);
+  breakdown["Temperature"] = scoreRange(temp, [
+    { min: 70, max: 72, points: 20 },
+    { min: 68, max: 74, points: 18 },
+    { min: 65, max: 77, points: 15 },
+    { min: 60, max: 82, points: 10 },
+    { min: 55, max: 87, points: 5 }
+  ]);
+
+  const dew = numericValue(build["Dew Point"]?.value);
+  breakdown["Dew Point"] = scoreRange(dew, [
+    { min: 53, max: 55, points: 20 },
+    { min: 50, max: 58, points: 18 },
+    { min: 47, max: 61, points: 15 },
+    { min: 44, max: 64, points: 10 },
+    { min: 40, max: 68, points: 5 }
+  ]);
+
+  const wind = numericValue(build["Wind Speed"]?.value);
+  breakdown["Wind Speed"] = scoreRange(wind, [
+    { min: 5, max: 8, points: 20 },
+    { min: 3, max: 10, points: 18 },
+    { min: 1, max: 13, points: 15 },
+    { min: 14, max: 18, points: 10 },
+    { min: 19, max: 25, points: 5 }
+  ]);
+
+  breakdown["Sky Cover"] = scoreSky(build["Sky Cover"]?.value);
+  breakdown["Visibility"] = scoreVisibility(build["Visibility"]?.value);
+
+  const pressure = numericValue(build["Pressure"]?.value);
+  breakdown["Pressure"] = scoreRange(pressure, [
+    { min: 1012, max: 1014, points: 10 },
+    { min: 1010, max: 1016, points: 8 },
+    { min: 1008, max: 1018, points: 6 },
+    { min: 1005, max: 1021, points: 3 }
+  ]);
+
+  const total = Object.values(breakdown).reduce((sum, points) => sum + points, 0);
+
+  let tier = "Rough Day";
+  if (total >= 95) tier = "Perfect Day";
+  else if (total >= 90) tier = "Elite";
+  else if (total >= 80) tier = "Great";
+  else if (total >= 70) tier = "Solid";
+  else if (total >= 60) tier = "Meh";
+
+  return { total, tier, breakdown };
+}
+
 
 
 function renderBoard() {
@@ -1130,6 +1221,18 @@ function renderShareCard() {
 
   const skyItem = build["Sky Cover"];
   els.shareMainIcon.textContent = skyItem ? (skyItem.icon || iconForSkyOrWeather(skyItem.value)) : "🌤️";
+
+  const score = calculateEverydayScore();
+  const scoreBlock = document.createElement("div");
+  scoreBlock.className = "score-block";
+  scoreBlock.innerHTML = `
+    <div class="score-main">${score.total}<span>/100</span></div>
+    <div>
+      <div class="score-tier">${score.tier}</div>
+      <div class="score-sub">Everyday Score</div>
+    </div>
+  `;
+  els.shareCardGrid.appendChild(scoreBlock);
 
   slots.forEach(slot => {
     const item = build[slot];
@@ -1428,7 +1531,9 @@ function draft(label, item) {
 }
 
 function copyBuild() {
+  const score = slots.every(slot => build[slot]) ? calculateEverydayScore() : null;
   const lines = [`${els.mode.value}: My Perfect Day`];
+  if (score) lines.push(`Score: ${score.total}/100 — ${score.tier}`);
   slots.forEach(slot => {
     const item = build[slot];
     lines.push(item ? `${item.icon || ""} ${slot}: ${item.value}${item.detail ? ` (${item.detail})` : ""} · ${item.abbr} (${item.station}) — ${item.note}` : `${slot}: —`);
@@ -1535,13 +1640,22 @@ async function downloadShareCard() {
   ctx.lineTo(800, 218);
   ctx.stroke();
 
+  const score = calculateEverydayScore();
+  roundRect(100, 245, 700, 105, 24);
+  ctx.fillStyle = "#eaf2ff";
+  ctx.fill();
+  drawText(`${score.total}`, 145, 315, { size: 58, weight: 950, color: "#164eb8" });
+  drawText("/100", 228, 315, { size: 26, weight: 950, color: "#164eb8" });
+  drawText(score.tier.toUpperCase(), 330, 292, { size: 25, weight: 950, color: "#122033" });
+  drawText("Everyday Score", 330, 322, { size: 18, weight: 850, color: "#68768a" });
+
   // Rows
   let y = 275;
   const rowH = 112;
   slots.forEach((slot, index) => {
     const item = build[slot];
     const x = index % 2 === 0 ? 100 : 462;
-    const rowY = 250 + Math.floor(index / 2) * rowH;
+    const rowY = 385 + Math.floor(index / 2) * rowH;
 
     roundRect(x, rowY, 338, 88, 20);
     ctx.fillStyle = "#f5f9ff";

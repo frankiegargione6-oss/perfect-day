@@ -431,3 +431,39 @@ button.mini {
   font-size: .74rem;
   font-weight: 850;
 }
+
+
+.score-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #eaf2ff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+
+.score-main {
+  color: var(--blue-dark);
+  font-size: 2.4rem;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.score-main span {
+  font-size: 1.1rem;
+}
+
+.score-tier {
+  color: var(--text);
+  font-weight: 950;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+}
+
+.score-sub {
+  color: var(--muted);
+  font-weight: 850;
+  font-size: .8rem;
+}

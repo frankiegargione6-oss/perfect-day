@@ -1,4 +1,4 @@
-# Perfect Day Prototype v0.14
+# Perfect Day Prototype v0.15
 
 ## New in v0.8
 
@@ -66,3 +66,10 @@ Do not double-click `index.html`; the local server has to be running.
 - Temperature card includes Feels Like underneath.
 - Dew Point card includes RH underneath.
 - Removed Feels Like, Humidity, and Sunset from the playable draft board.
+
+## v0.15 changes
+
+- Removed Wind Direction from the playable draft.
+- Draft now has 6 variables.
+- Added Everyday scoring out of 100.
+- Added score tier to the final share card.
