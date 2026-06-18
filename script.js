@@ -583,15 +583,12 @@ const cityData = {
 
 const slots = [
   "Temperature",
-  "Feels Like",
   "Dew Point",
-  "Humidity",
   "Wind Speed",
   "Wind Direction",
   "Sky Cover",
   "Visibility",
-  "Pressure",
-  "Sunset"
+  "Pressure"
 ];
 
 let round = 0;
@@ -977,16 +974,24 @@ function normalizeNwsObservation(payload, cityObj, apiUrl) {
     source: "Live NWS",
     obsAge,
     values: {
-      "Temperature": { value: tempF !== null ? `${tempF}°F` : "Missing", note: "Live NWS", icon: "🌡️" },
-      "Feels Like": { value: feelsValue !== null ? `${feelsValue}°F` : "Missing", note: feelsNote, icon: "🤔" },
-      "Dew Point": { value: dewF !== null ? `${dewF}°F` : "Missing", note: "Live NWS", icon: "💧" },
-      "Humidity": { value: humidity !== null ? `${humidity}%` : "Missing", note: props.relativeHumidity?.value ? "Live NWS" : "Calculated from temp/dewpoint", icon: "💦" },
+      "Temperature": {
+        value: tempF !== null ? `${tempF}°F` : "Missing",
+        detail: feelsValue !== null ? `Feels like ${feelsValue}°F · ${feelsNote}` : "Feels like unavailable",
+        note: "Live NWS",
+        icon: "🌡️"
+      },
+      "Dew Point": {
+        value: dewF !== null ? `${dewF}°F` : "Missing",
+        detail: humidity !== null ? `RH ${humidity}%` : "RH unavailable",
+        note: props.relativeHumidity?.value ? "Live NWS" : "RH calculated from temp/dewpoint",
+        icon: "💧"
+      },
       "Wind Speed": { value: windValue, note: gustMph !== null ? "Live NWS · includes gust" : "Live NWS", icon: "💨" },
       "Wind Direction": { value: windDirectionText(windDir), note: windDir !== undefined && windDir !== null ? `${windDir}° · Live NWS` : "Live NWS", icon: "🧭" },
       "Sky Cover": { value: weatherText ? `${sky} · ${weatherText}` : sky, note: "Live NWS clouds/weather", icon: iconForSkyOrWeather(sky, weatherText) },
       "Visibility": { value: vis !== null ? `${vis} mi` : "Missing", note: "Live NWS", icon: "👁️" },
-      "Pressure": { value: pressureHpa !== null ? `${pressureHpa} hPa` : "Missing", note: "Live NWS", icon: "📈" },
-      "Sunset": { value: sunset, note: `Calculated local time · ${timezone.replace("America/", "")}`, icon: "🌅" }
+      "Pressure": { value: pressureHpa !== null ? `${pressureHpa} hPa` : "Missing", note: "Live NWS", icon: "📈" }
+    }
     }
   };
 }
@@ -1022,6 +1027,7 @@ function generateFallbackWeather(cityObj) {
     "Sky Cover": { value: sky, note: "Fallback demo data", icon: iconForSkyOrWeather(sky) },
     "Visibility": { value: `${visibility} mi`, note: "Fallback demo data", icon: "👁️" },
     "Pressure": { value: `${pressure} hPa`, note: "Fallback demo data", icon: "📈" }
+  }
   };
 }
 
