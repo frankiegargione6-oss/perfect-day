@@ -1,0 +1,12 @@
+{
+  "name": "perfect-day-prototype",
+  "version": "0.10.0",
+  "description": "Perfect Day weather draft prototype using NWS latest observations",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
