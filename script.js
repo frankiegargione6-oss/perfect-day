@@ -892,6 +892,22 @@ function localSunsetTime(lat, lon, timezone) {
   });
 }
 
+
+function isBrokenObservation(weather) {
+  if (!weather || weather.source !== "Live NWS" || !weather.values) return true;
+
+  const critical = ["Temperature", "Dew Point", "Wind Speed", "Sky Cover"];
+  const missingCritical = critical.filter(slot => !weather.values[slot] || weather.values[slot].value === "Missing").length;
+
+  // Automatically reject if most core values are missing.
+  return missingCritical >= 2;
+}
+
+function buildCityFailureMessage(cityObj, reason = "observation unavailable") {
+  return `<p><strong>${cityObj.name}</strong> was skipped because the latest observation was broken or missing.<br/>Automatic re-spin triggered. Reason: ${reason}</p>`;
+}
+
+
 async function fetchNwsWeather(cityObj) {
   const url = `/api/nws/${cityObj.station}`;
 
@@ -999,16 +1015,13 @@ function generateFallbackWeather(cityObj) {
   const sky = pick(["Sunny", "Mostly Sunny", "Partly Cloudy", "Mostly Cloudy", "Overcast", "Light Rain", "Clear"]);
 
   return {
-    "Temperature": { value: `${temp}°F`, note: "Fallback demo data", icon: "🌡️" },
-    "Feels Like": { value: `${temp}°F`, note: "Actual Temp", icon: "🤔" },
-    "Dew Point": { value: `${dew}°F`, note: "Fallback demo data", icon: "💧" },
-    "Humidity": { value: `${humidity}%`, note: "Calculated fallback", icon: "💦" },
+    "Temperature": { value: `${temp}°F`, detail: `Feels like ${temp}°F · Actual Temp`, note: "Fallback demo data", icon: "🌡️" },
+    "Dew Point": { value: `${dew}°F`, detail: `RH ${humidity}%`, note: "Calculated fallback", icon: "💧" },
     "Wind Speed": { value: `${wind} mph${gust !== null ? ` G${gust}` : ""}`, note: gust !== null ? "Fallback · includes gust" : "Fallback demo data", icon: "💨" },
     "Wind Direction": { value: pick(["N", "NE", "E", "SE", "S", "SW", "W", "NW"]), note: "Fallback demo data", icon: "🧭" },
     "Sky Cover": { value: sky, note: "Fallback demo data", icon: iconForSkyOrWeather(sky) },
     "Visibility": { value: `${visibility} mi`, note: "Fallback demo data", icon: "👁️" },
-    "Pressure": { value: `${pressure} hPa`, note: "Fallback demo data", icon: "📈" },
-    "Sunset": { value: sunset, note: "Calculated local time", icon: "🌅" }
+    "Pressure": { value: `${pressure} hPa`, note: "Fallback demo data", icon: "📈" }
   };
 }
 
@@ -1066,6 +1079,7 @@ function renderBoard() {
       <span class="slot">${item ? item.icon : ""} ${slot}</span>
       <span class="pick">
         ${item ? item.value : "—"}
+        ${item && item.detail ? `<span class="source">${item.detail}</span>` : ""}
         ${item ? `<span class="source">${item.abbr} · ${item.station}</span>` : ""}
         ${item ? `<span class="source">${item.note}</span>` : ""}
       </span>
@@ -1099,6 +1113,7 @@ function renderShareCard() {
       <div>
         <div class="share-label">${slot}</div>
         <div class="share-value">${item ? item.value : "—"}</div>
+        ${item && item.detail ? `<div class="share-detail">${item.detail}</div>` : ""}
       </div>
       <div class="share-source">${item ? `${item.abbr} · ${item.station}` : ""}</div>
     `;
@@ -1125,7 +1140,10 @@ function updateRoundText() {
   updateRespinUI();
 }
 
-async function runSelection(region, city) {
+async function runSelection(region, city, options = {}) {
+  const attempted = options.attempted || new Set();
+  const maxAttempts = options.maxAttempts || 8;
+
   selectedRegion = region;
   selectedCity = city;
   currentRegion = region;
@@ -1134,7 +1152,66 @@ async function runSelection(region, city) {
   currentCity = {...city, region};
   currentWeather = await fetchNwsWeather(currentCity);
 
-  els.spinResult.innerHTML = `<p>🎡 Region: <strong>${region}</strong><br/>📍 City: <strong>${city.name}</strong><br/>🛫 Station: <strong>${city.station}</strong></p>`;
+  const attemptKey = `${region}:${city.name}`;
+  attempted.add(attemptKey);
+
+  if (isBrokenObservation(currentWeather) && attempted.size < maxAttempts) {
+    els.weatherCard.classList.add("hidden");
+    els.spinResult.innerHTML = buildCityFailureMessage(city, currentWeather.source || "missing data");
+
+    await wait(850);
+
+    const cityPool = cityData[region].filter(c => !attempted.has(`${region}:${c.name}`));
+    let nextRegion = region;
+    let nextCity;
+
+    if (cityPool.length > 0) {
+      nextCity = pick(cityPool);
+      await animateWheel(
+        els.cityWheel,
+        els.cityStatus,
+        cityData[region].map(c => c.name),
+        nextCity.name,
+        1100,
+        "Auto re-spinning city"
+      );
+    } else {
+      const availableRegions = Object.keys(cityData).filter(r =>
+        cityData[r].some(c => !attempted.has(`${r}:${c.name}`))
+      );
+      nextRegion = availableRegions.length ? pick(availableRegions) : pick(Object.keys(cityData));
+      nextCity = pick(cityData[nextRegion]);
+
+      await animateWheel(
+        els.regionWheel,
+        els.regionStatus,
+        Object.keys(cityData),
+        nextRegion,
+        1100,
+        "Auto re-spinning region"
+      );
+
+      await wait(250);
+
+      await animateWheel(
+        els.cityWheel,
+        els.cityStatus,
+        cityData[nextRegion].map(c => c.name),
+        nextCity.name,
+        1100,
+        "Auto re-spinning city"
+      );
+    }
+
+    return runSelection(nextRegion, nextCity, { attempted, maxAttempts });
+  }
+
+  if (isBrokenObservation(currentWeather)) {
+    els.spinResult.innerHTML = `<p><strong>Warning:</strong> Several observations failed. Showing the best available card.</p>`;
+  } else {
+    els.spinResult.innerHTML = `<p>🎡 Region: <strong>${region}</strong><br/>📍 City: <strong>${city.name}</strong><br/>🛫 Station: <strong>${city.station}</strong></p>`;
+  }
+
   els.weatherCard.classList.remove("hidden");
   els.regionName.textContent = region;
   els.cityName.textContent = city.name;
@@ -1270,6 +1347,7 @@ function renderAttributes() {
         <span class="attr-icon">${icon}</span>
         <span class="value">${item.value}</span>
       </div>
+      ${item.detail ? `<div class="combo-detail">${item.detail}</div>` : ""}
       <div class="source ${noteClass}">${currentCity.abbr} · ${currentCity.station}</div>
       <div class="note">${item.note || ""}</div>
     `;
@@ -1288,6 +1366,7 @@ function draft(label, item) {
   build[label] = {
     value: item.value,
     note: item.note,
+    detail: item.detail,
     icon: item.icon || iconForAttribute(label, item),
     abbr: currentCity.abbr,
     city: currentCity.name,
@@ -1324,7 +1403,7 @@ function copyBuild() {
   const lines = [`${els.mode.value}: My Perfect Day`];
   slots.forEach(slot => {
     const item = build[slot];
-    lines.push(item ? `${item.icon || ""} ${slot}: ${item.value} · ${item.abbr} (${item.station}) — ${item.note}` : `${slot}: —`);
+    lines.push(item ? `${item.icon || ""} ${slot}: ${item.value}${item.detail ? ` (${item.detail})` : ""} · ${item.abbr} (${item.station}) — ${item.note}` : `${slot}: —`);
   });
 
   navigator.clipboard.writeText(lines.join("\n")).then(() => {
@@ -1338,69 +1417,162 @@ function copyBuild() {
 async function downloadShareCard() {
   const complete = slots.every(slot => build[slot]);
   if (!complete) {
-    alert("Finish all 10 picks before downloading your final card.");
+    alert("Finish all picks before downloading your final card.");
     return;
   }
-  renderShareCard();
-  const card = els.shareCard;
-  const rect = card.getBoundingClientRect();
+
   const scale = 2;
-  const width = Math.ceil(rect.width * scale);
-  const height = Math.ceil(rect.height * scale);
+  const width = 900;
+  const height = 1180;
+  const canvas = document.createElement("canvas");
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
 
-  const cssText = Array.from(document.styleSheets)
-    .map(sheet => {
-      try {
-        return Array.from(sheet.cssRules).map(rule => rule.cssText).join("\n");
-      } catch {
-        return "";
+  const radius = 36;
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawText(text, x, y, opts = {}) {
+    ctx.fillStyle = opts.color || "#122033";
+    ctx.font = `${opts.weight || 800} ${opts.size || 24}px ${opts.family || "Arial, sans-serif"}`;
+    ctx.textAlign = opts.align || "left";
+    ctx.textBaseline = opts.baseline || "alphabetic";
+    ctx.fillText(text, x, y);
+  }
+
+  function wrapText(text, x, y, maxWidth, lineHeight, opts = {}) {
+    const words = String(text || "").split(" ");
+    let line = "";
+    let currentY = y;
+    for (const word of words) {
+      const testLine = line ? `${line} ${word}` : word;
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && line) {
+        drawText(line, x, currentY, opts);
+        line = word;
+        currentY += lineHeight;
+      } else {
+        line = testLine;
       }
-    })
-    .join("\n");
+    }
+    if (line) drawText(line, x, currentY, opts);
+    return currentY;
+  }
 
-  const cloned = card.cloneNode(true);
-  cloned.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, width, height);
+  bg.addColorStop(0, "#f8fbff");
+  bg.addColorStop(1, "#dcefff");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, width, height);
 
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${rect.width} ${rect.height}">
-      <foreignObject width="100%" height="100%">
-        <div xmlns="http://www.w3.org/1999/xhtml">
-          <style>${cssText}</style>
-          ${cloned.outerHTML}
-        </div>
-      </foreignObject>
-    </svg>
-  `;
+  // Soft sun circle
+  ctx.beginPath();
+  ctx.arc(765, 115, 150, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255, 220, 120, 0.65)";
+  ctx.fill();
 
-  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
+  // Main card
+  ctx.shadowColor = "rgba(20, 45, 80, 0.18)";
+  ctx.shadowBlur = 38;
+  ctx.shadowOffsetY = 18;
+  roundRect(60, 60, width - 120, height - 120, radius);
+  ctx.fillStyle = "rgba(255,255,255,0.94)";
+  ctx.fill();
+  ctx.shadowColor = "transparent";
 
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    ctx.scale(scale, scale);
-    ctx.drawImage(img, 0, 0);
-    URL.revokeObjectURL(url);
+  // Header
+  drawText("PERFECT DAY", 100, 125, { size: 22, weight: 950, color: "#164eb8" });
+  drawText(`${els.mode.value} Build`, 100, 180, { size: 46, weight: 950 });
 
-    canvas.toBlob(pngBlob => {
-      const pngUrl = URL.createObjectURL(pngBlob);
-      const a = document.createElement("a");
-      a.href = pngUrl;
-      a.download = "perfect-day-card.png";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(pngUrl);
-    }, "image/png");
-  };
-  img.onerror = () => {
-    URL.revokeObjectURL(url);
-    alert("Download failed in this browser. Try taking a screenshot of the share card instead.");
-  };
-  img.src = url;
+  const skyItem = build["Sky Cover"];
+  const mainIcon = skyItem ? (skyItem.icon || iconForSkyOrWeather(skyItem.value)) : "🌤️";
+  drawText(mainIcon, 740, 165, { size: 70, weight: 900, align: "center" });
+
+  // Divider
+  ctx.strokeStyle = "#dbe6f3";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(100, 218);
+  ctx.lineTo(800, 218);
+  ctx.stroke();
+
+  // Rows
+  let y = 275;
+  const rowH = 112;
+  slots.forEach((slot, index) => {
+    const item = build[slot];
+    const x = index % 2 === 0 ? 100 : 462;
+    const rowY = 250 + Math.floor(index / 2) * rowH;
+
+    roundRect(x, rowY, 338, 88, 20);
+    ctx.fillStyle = "#f5f9ff";
+    ctx.fill();
+    ctx.strokeStyle = "#dbe6f3";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    drawText(item?.icon || iconForAttribute(slot, item), x + 22, rowY + 52, { size: 30 });
+    drawText(slot.toUpperCase(), x + 66, rowY + 30, { size: 14, weight: 950, color: "#68768a" });
+    drawText(item?.value || "—", x + 66, rowY + 58, { size: 25, weight: 950 });
+    if (item?.detail) {
+      drawText(item.detail, x + 66, rowY + 78, { size: 13, weight: 800, color: "#68768a" });
+    }
+    drawText(item ? `${item.abbr} · ${item.station}` : "", x + 316, rowY + 58, { size: 13, weight: 950, color: "#164eb8", align: "right" });
+  });
+
+  const footerY = 1030;
+  ctx.strokeStyle = "#dbe6f3";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(100, footerY - 35);
+  ctx.lineTo(800, footerY - 35);
+  ctx.stroke();
+
+  drawText("Built from live NWS airport observations", 450, footerY, { size: 19, weight: 850, color: "#68768a", align: "center" });
+  drawText("perfect-day", 450, footerY + 38, { size: 18, weight: 950, color: "#276ef1", align: "center" });
+
+  canvas.toBlob(async (blob) => {
+    if (!blob) {
+      alert("Could not create image. Try taking a screenshot instead.");
+      return;
+    }
+
+    const file = new File([blob], "perfect-day-card.png", { type: "image/png" });
+
+    // On phones, this opens the native share sheet, which can save to Photos/Camera Roll.
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "My Perfect Day",
+          text: "Check out my Perfect Day weather draft."
+        });
+        return;
+      } catch (error) {
+        // If user cancels share, fall through to download.
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "perfect-day-card.png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, "image/png");
 }
 
 function reset() {

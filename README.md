@@ -1,4 +1,4 @@
-# Perfect Day Prototype v0.10
+# Perfect Day Prototype v0.12
 
 ## New in v0.8
 
@@ -43,3 +43,18 @@ Do not double-click `index.html`; the local server has to be running.
 - Final card now pops up centered when the build is complete.
 - Added a generated share link using the URL hash.
 - Added modal buttons for copying the link, copying build text, and downloading the card.
+
+## v0.11 changes
+
+- Removed Feels Like as a standalone draft slot.
+- Removed Humidity as a standalone draft slot.
+- Removed Sunset as a standalone draft slot.
+- Temperature now shows Feels Like as a paired detail.
+- Dew Point now shows Relative Humidity as a paired detail.
+- Draft now has 7 slots instead of 10.
+
+## v0.12 changes
+
+- Fixed final card download using a canvas-generated PNG.
+- On mobile, the download button uses the native share sheet when supported, which can save to Photos/Camera Roll.
+- If a city returns broken/missing NWS data, the game automatically re-spins without using the player's region/city re-spin.

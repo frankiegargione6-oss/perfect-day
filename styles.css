@@ -416,3 +416,18 @@ button.mini {
 .share-link-note { margin: 8px 2px 0; color: var(--muted); font-size: .78rem; font-weight: 750; }
 .modal-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 @media (max-width: 650px) { .share-link-row { flex-direction: column; } .modal-top { flex-direction: column; } }
+
+
+.combo-detail {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 850;
+}
+
+.share-detail {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: .74rem;
+  font-weight: 850;
+}
