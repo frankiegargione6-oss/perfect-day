@@ -654,6 +654,29 @@ function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function isDailyChallengePage() {
+  return document.body?.dataset?.page === "daily-challenge";
+}
+
+function dailyChallengeKey(date = new Date()) {
+  return date.toLocaleDateString("en-CA");
+}
+
+function hashStringToNumber(text) {
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return Math.abs(hash >>> 0);
+}
+
+function dailyPick(arr, salt = "") {
+  if (!arr || !arr.length) return null;
+  const index = hashStringToNumber(`${dailyChallengeKey()}-${salt}`) % arr.length;
+  return arr[index];
+}
+
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -1397,14 +1420,14 @@ async function spin() {
   els.cityStatus.textContent = "Waiting";
 
   const regionOptions = Object.keys(cityData);
-  const region = pick(regionOptions);
+  const region = isDailyChallengePage() ? dailyPick(regionOptions, `region-${round}`) : pick(regionOptions);
 
   await animateWheel(els.regionWheel, els.regionStatus, regionOptions, region, 1500, "Spinning region");
 
   await wait(350);
 
   const cityOptions = cityData[region];
-  const city = pick(cityOptions);
+  const city = isDailyChallengePage() ? dailyPick(cityOptions, `city-${round}`) : pick(cityOptions);
 
   await animateWheel(
     els.cityWheel,

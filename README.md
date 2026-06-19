@@ -102,3 +102,15 @@ Do not double-click `index.html`; the local server has to be running.
 - Added dark mode toggle saved locally.
 - Added Achievements page.
 - Final missing-variable auto-reroll now triggers whenever the final slot is missing.
+
+## v0.20 changes
+
+- Added Daily Challenge page.
+- Added one daily completed attempt per account.
+- Added Daily Challenge history/calendar panel.
+- Added Daily Challenge streak.
+- Added today's Daily scores panel.
+- Added Daily Challenge to mode leaderboard filter.
+- Dark mode re-spin buttons are darker.
+
+Run `supabase_daily_update.sql` in Supabase before deploying.

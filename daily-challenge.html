@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Perfect Day</title>
+  <title>Daily Challenge · Perfect Day</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
-<body data-page="game">
+<body data-page="daily-challenge">
 
   <header class="site-header">
     <a class="brand" href="/">Perfect Day</a>
@@ -27,20 +27,46 @@
   </header>
   <main class="app">
     <section class="hero">
-      <p class="eyebrow">Weather Draft Game</p>
-      <h1>Perfect Day</h1>
-      <p class="subtitle">Spin a U.S. region, pull a city, and draft one live NWS weather attribute to build your ideal day.</p>
+      <p class="eyebrow">One Attempt Per Day</p>
+      <h1>Daily Challenge</h1>
+      <p class="subtitle">Build today's Perfect Day once. Your first completed score is locked for the day.</p>
     </section>
-    <section class="mode-card">
-      <label for="mode">Game Mode</label>
-      <select id="mode">
-        <option value="Everyday">Everyday</option>
-        <option value="Beach Day">Beach Day</option>
-        <option value="Tailgate">Tailgate</option>
-        <option value="Golf Day">Golf Day</option>
-        <option value="Snow Day">Snow Day</option>
-        <option value="Storm Lover">Storm Lover</option>
-      </select>
+    <section class="daily-top-grid">
+      <div class="mode-card daily-mode-card">
+        <label for="mode">Mode</label>
+        <select id="mode" disabled>
+          <option value="Daily Challenge">Daily Challenge</option>
+        </select>
+      </div>
+      <div class="daily-status-card">
+        <div>
+          <p class="eyebrow">Today's attempt</p>
+          <h2 id="dailyStatusTitle">Checking...</h2>
+          <p id="dailyStatusText" class="page-subtitle">Loading your daily challenge status.</p>
+        </div>
+        <button id="dailyHistoryToggle" class="secondary" type="button">📅 Calendar</button>
+      </div>
+    </section>
+
+    <section id="dailyHistoryPanel" class="page-card daily-history-panel hidden">
+      <div class="page-heading-row">
+        <div>
+          <p class="eyebrow">Daily History</p>
+          <h2>Previous Daily Challenges</h2>
+        </div>
+      </div>
+      <div id="dailyHistoryList" class="data-list">Loading daily history...</div>
+    </section>
+
+    <section class="page-card daily-score-panel">
+      <div class="page-heading-row">
+        <div>
+          <p class="eyebrow">Today</p>
+          <h2>Daily Scores</h2>
+          <p class="page-subtitle">Friends-only daily scores will connect after the friends update. For now, this shows today's logged-in scores.</p>
+        </div>
+      </div>
+      <div id="dailyScoresList" class="data-list">Loading today's scores...</div>
     </section>
 
     <section class="game-grid">
@@ -111,7 +137,7 @@
       <aside class="panel final-panel">
         <div class="final-top">
           <p class="small">Your build</p>
-          <h2 id="finalTitle">Your Perfect Day</h2>
+          <h2 id="finalTitle">Daily Challenge</h2>
         </div>
 
         <div id="draftBoard" class="draft-board"></div>

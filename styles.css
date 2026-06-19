@@ -988,3 +988,56 @@ button.mini {
   .achievement-icon { width: 42px; height: 42px; }
   .xp-top { flex-direction: column; }
 }
+
+/* v0.20: Daily Challenge + darker dark-mode respin buttons */
+:root[data-theme="dark"] button.secondary.mini,
+:root[data-theme="dark"] #respinRegionBtn,
+:root[data-theme="dark"] #respinCityBtn {
+  background: #0b1423;
+  color: #cfe0ff;
+  border: 1px solid #314766;
+}
+:root[data-theme="dark"] button.secondary.mini:hover:not(:disabled),
+:root[data-theme="dark"] #respinRegionBtn:hover:not(:disabled),
+:root[data-theme="dark"] #respinCityBtn:hover:not(:disabled) {
+  background: #1d3352;
+  color: #ffffff;
+}
+.daily-top-grid {
+  width: min(900px, 100%);
+  margin: 0 auto 22px;
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+.daily-mode-card { width: 100%; margin: 0; }
+.daily-status-card {
+  background: rgba(255,255,255,.72);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.daily-history-panel,
+.daily-score-panel { width: min(900px, 100%); margin: 0 auto 22px; }
+.daily-streak-card {
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.daily-streak-card strong { font-size: 1.6rem; color: var(--blue-dark); font-weight: 950; }
+.daily-streak-card span { color: var(--muted); font-weight: 900; text-transform: uppercase; letter-spacing: .08em; font-size: .78rem; }
+:root[data-theme="dark"] .daily-status-card { background: rgba(17, 28, 45, .9); }
+@media (max-width: 760px) {
+  .daily-top-grid { grid-template-columns: 1fr; }
+  .daily-status-card { align-items: flex-start; flex-direction: column; }
+}

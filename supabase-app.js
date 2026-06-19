@@ -9,6 +9,10 @@ let lastSavedGameSignature = null;
 
 function $(id) { return document.getElementById(id); }
 function pageName() { return document.body?.dataset?.page || "game"; }
+function isDailyChallengePage() { return pageName() === "daily-challenge"; }
+function todayKey(date = new Date()) { return date.toLocaleDateString("en-CA"); }
+function startOfTodayISO() { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString(); }
+function startOfTomorrowISO() { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+1); return d.toISOString(); }
 
 function applyTheme(theme) {
   const finalTheme = theme === "dark" ? "dark" : "light";
@@ -232,12 +236,26 @@ function getGameSignature() {
 }
 
 async function saveCompletedGame() {
-  if (!supabaseClient || !loggedInUser) return;
+  if (!supabaseClient || !loggedInUser) {
+    if (isDailyChallengePage()) alert("Log in before playing the Daily Challenge so your one attempt can be saved.");
+    return;
+  }
   if (typeof slots === "undefined" || typeof build === "undefined") return;
   if (!slots.every(slot => build[slot])) return;
 
   const signature = getGameSignature();
   if (lastSavedGameSignature === signature) return;
+
+  const mode = isDailyChallengePage() ? "Daily Challenge" : els.mode.value;
+
+  if (mode === "Daily Challenge") {
+    const existing = await getTodaysDailyScore();
+    if (existing) {
+      alert("You already completed today's Daily Challenge. Your first completed score is locked in.");
+      lockDailyGame(existing);
+      return;
+    }
+  }
 
   const score = calculateEverydayScore();
   const respinsUsed = (regionRespinUsed ? 1 : 0) + (cityRespinUsed ? 1 : 0);
@@ -245,7 +263,7 @@ async function saveCompletedGame() {
   const payload = {
     user_id: loggedInUser.id,
     score: score.total,
-    mode: els.mode.value,
+    mode,
     score_tier: score.tier,
     game_data: build,
     guesses_used: slots.length,
@@ -262,6 +280,9 @@ async function saveCompletedGame() {
   }
 
   lastSavedGameSignature = signature;
+  if (mode === "Daily Challenge") {
+    await loadDailyChallenge();
+  }
 }
 
 let leaderboardExpanded = false;
@@ -558,12 +579,164 @@ async function loadAchievements() {
   `).join("");
 }
 
+
+async function getTodaysDailyScore() {
+  if (!loggedInUser || !supabaseClient) return null;
+  const { data, error } = await supabaseClient
+    .from("game_scores")
+    .select("score, mode, score_tier, created_at, game_data")
+    .eq("user_id", loggedInUser.id)
+    .eq("mode", "Daily Challenge")
+    .gte("created_at", startOfTodayISO())
+    .lt("created_at", startOfTomorrowISO())
+    .order("created_at", { ascending: true })
+    .limit(1);
+  if (error) {
+    console.warn("Daily score lookup failed:", error.message);
+    return null;
+  }
+  return data?.[0] || null;
+}
+
+function setDailyStatus(title, text) {
+  const titleEl = $("dailyStatusTitle");
+  const textEl = $("dailyStatusText");
+  if (titleEl) titleEl.textContent = title;
+  if (textEl) textEl.textContent = text;
+}
+
+function lockDailyGame(existing = null) {
+  if (typeof els !== "undefined" && els.spinBtn) {
+    els.spinBtn.disabled = true;
+    els.spinBtn.textContent = "Completed";
+  }
+  if (typeof els !== "undefined" && els.respinRegionBtn) els.respinRegionBtn.disabled = true;
+  if (typeof els !== "undefined" && els.respinCityBtn) els.respinCityBtn.disabled = true;
+  if (typeof els !== "undefined" && els.spinResult) {
+    els.spinResult.classList.remove("empty");
+    els.spinResult.innerHTML = existing
+      ? `<p><strong>Daily Challenge complete.</strong><br/>Your locked score today: ${existing.score}/100 — ${existing.score_tier || "Completed"}</p>`
+      : `<p><strong>Log in to play the Daily Challenge.</strong><br/>Daily scores are locked to one attempt per account.</p>`;
+  }
+}
+
+async function loadDailyScores() {
+  const list = $("dailyScoresList");
+  if (!list || !supabaseClient) return;
+  list.innerHTML = "Loading today's scores...";
+  const { data, error } = await supabaseClient
+    .from("game_scores")
+    .select("user_id, score, score_tier, created_at, profiles(username)")
+    .eq("mode", "Daily Challenge")
+    .gte("created_at", startOfTodayISO())
+    .lt("created_at", startOfTomorrowISO())
+    .order("score", { ascending: false })
+    .limit(50);
+  if (error) {
+    list.textContent = error.message;
+    return;
+  }
+  if (!data || data.length === 0) {
+    list.innerHTML = `<div class="empty-state">No one has completed today's Daily Challenge yet.</div>`;
+    return;
+  }
+  list.innerHTML = data.map((row, idx) => {
+    const isMe = loggedInUser && row.user_id === loggedInUser.id;
+    return `<div class="data-row leaderboard-row ${isMe ? "is-me" : ""}">
+      <div class="data-rank">#${idx + 1}</div>
+      <div>
+        <div class="data-main">${row.profiles?.username || "Unknown Player"}</div>
+        <div class="data-sub">${row.score_tier || "Completed"} · ${new Date(row.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</div>
+      </div>
+      <div class="data-score">${row.score}/100</div>
+    </div>`;
+  }).join("");
+}
+
+function calculateDailyStreak(rows) {
+  const days = new Set((rows || []).map(r => new Date(r.created_at).toLocaleDateString("en-CA")));
+  let streak = 0;
+  const d = new Date();
+  while (days.has(d.toLocaleDateString("en-CA"))) {
+    streak += 1;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+async function loadDailyHistory() {
+  const list = $("dailyHistoryList");
+  if (!list || !supabaseClient) return;
+  if (!loggedInUser) {
+    list.innerHTML = `<div class="empty-state">Log in to see your Daily Challenge calendar.</div>`;
+    return;
+  }
+  const { data, error } = await supabaseClient
+    .from("game_scores")
+    .select("score, score_tier, created_at")
+    .eq("user_id", loggedInUser.id)
+    .eq("mode", "Daily Challenge")
+    .order("created_at", { ascending: false })
+    .limit(60);
+  if (error) {
+    list.textContent = error.message;
+    return;
+  }
+  const streak = calculateDailyStreak(data || []);
+  if (!data || data.length === 0) {
+    list.innerHTML = `<div class="empty-state">No Daily Challenges completed yet.</div>`;
+    return;
+  }
+  list.innerHTML = `<div class="daily-streak-card"><strong>🔥 ${streak}</strong><span>day streak</span></div>` + data.map(row => `
+    <div class="data-row">
+      <div class="data-rank">📅</div>
+      <div>
+        <div class="data-main">${new Date(row.created_at).toLocaleDateString()}</div>
+        <div class="data-sub">${row.score_tier || "Completed"}</div>
+      </div>
+      <div class="data-score">${row.score}/100</div>
+    </div>
+  `).join("");
+}
+
+async function loadDailyChallenge() {
+  if (!isDailyChallengePage()) return;
+  const historyToggle = $("dailyHistoryToggle");
+  const historyPanel = $("dailyHistoryPanel");
+  historyToggle?.addEventListener("click", async () => {
+    historyPanel?.classList.toggle("hidden");
+    await loadDailyHistory();
+  });
+
+  if (!loggedInUser) {
+    setDailyStatus("Log in required", "Daily Challenge is one locked attempt per account. Log in or sign up first.");
+    lockDailyGame(null);
+    await loadDailyScores();
+    return;
+  }
+
+  const existing = await getTodaysDailyScore();
+  if (existing) {
+    setDailyStatus("Completed", `Your score today is locked: ${existing.score}/100 — ${existing.score_tier || "Completed"}.`);
+    lockDailyGame(existing);
+  } else {
+    setDailyStatus("Ready", `Today is ${todayKey()}. You have one completed attempt.`);
+    if (typeof els !== "undefined" && els.spinBtn) {
+      els.spinBtn.disabled = false;
+      els.spinBtn.textContent = "Start Daily";
+    }
+  }
+  await loadDailyScores();
+  await loadDailyHistory();
+}
+
 async function routePageLoad() {
   const page = pageName();
   if (page === "leaderboard") await loadLeaderboard();
   if (page === "past-games") await loadPastGames();
   if (page === "profile") await loadProfile();
   if (page === "achievements") await loadAchievements();
+  if (page === "daily-challenge") await loadDailyChallenge();
 }
 
 function bindPageButtons() {
