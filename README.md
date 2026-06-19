@@ -88,3 +88,7 @@ Do not double-click `index.html`; the local server has to be running.
 - Added separate pages for Sign Up, Log In, Leaderboard, Past Games, and Profile.
 - Leaderboard link uses a chart icon. Past Games link uses a clock/history icon.
 - Logged-in users see their username in the top-right profile button.
+
+
+## v0.18.2
+- Fixed login hang caused by Supabase auth state callback awaiting profile/database calls during sign-in.

@@ -43,10 +43,14 @@ function initSupabase() {
     await routePageLoad();
   });
 
-  supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+  // Do not await Supabase/database calls directly inside onAuthStateChange.
+  // Supabase can hang if the callback awaits another Supabase request while auth is resolving.
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
     loggedInUser = session?.user || null;
     currentProfile = null;
-    await refreshNav();
+    setTimeout(() => {
+      refreshNav().catch(error => console.warn("Nav refresh failed:", error.message));
+    }, 0);
   });
 }
 
@@ -144,7 +148,7 @@ async function loginWithEmail() {
   try {
     const { data, error } = await withTimeout(
       supabaseClient.auth.signInWithPassword({ email, password }),
-      12000,
+      20000,
       "Login timed out. Refresh and try again."
     );
 
