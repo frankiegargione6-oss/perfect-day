@@ -467,3 +467,102 @@ button.mini {
   font-weight: 850;
   font-size: .8rem;
 }
+
+/* Supabase account + leaderboard UI */
+.account-card, .data-panel {
+  width: min(920px, 100%);
+  margin: 0 auto 24px;
+  background: rgba(255,255,255,.82);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.account-card {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(320px, 1.4fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.account-subtitle {
+  color: var(--muted);
+  margin: 8px 0 0;
+  font-weight: 750;
+}
+
+.auth-forms, .auth-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.auth-forms input, .auth-actions input {
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 999px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-weight: 800;
+  min-width: 150px;
+}
+
+.data-panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.data-list {
+  display: grid;
+  gap: 10px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.data-row {
+  display: grid;
+  grid-template-columns: 58px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 18px;
+  padding: 12px 14px;
+}
+
+.data-rank {
+  color: var(--blue-dark);
+  font-weight: 950;
+  font-size: 1.1rem;
+}
+
+.data-main {
+  color: var(--text);
+  font-weight: 950;
+}
+
+.data-sub {
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 800;
+  margin-top: 3px;
+}
+
+.data-score {
+  color: var(--blue-dark);
+  font-weight: 950;
+  font-size: 1rem;
+}
+
+@media (max-width: 850px) {
+  .account-card { grid-template-columns: 1fr; }
+  .auth-forms, .auth-actions { justify-content: flex-start; }
+  .auth-forms input, .auth-actions input { width: 100%; }
+  .data-row { grid-template-columns: 44px 1fr; }
+  .data-score { grid-column: 2; }
+}
