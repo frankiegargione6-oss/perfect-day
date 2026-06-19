@@ -566,3 +566,207 @@ button.mini {
   .data-row { grid-template-columns: 44px 1fr; }
   .data-score { grid-column: 2; }
 }
+
+
+/* v0.18 standard site navigation + separate account pages */
+.site-header {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.brand {
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 950;
+  text-decoration: none;
+}
+.site-nav, .nav-auth, .account-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-link, .nav-button, .nav-user {
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.74);
+  color: var(--blue-dark);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 950;
+  box-shadow: 0 8px 22px rgba(20,45,80,.06);
+}
+.nav-link:hover, .nav-button:hover, .nav-user:hover {
+  background: #eaf2ff;
+}
+.nav-button.primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+.nav-icon, .profile-icon, .title-icon {
+  margin-right: 6px;
+}
+.nav-user {
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+}
+.hidden { display: none !important; }
+.slim-app {
+  max-width: 860px;
+}
+.page-card {
+  background: rgba(255,255,255,.9);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+.auth-page-card {
+  max-width: 520px;
+  margin: 22px auto 0;
+}
+.page-title {
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  line-height: .95;
+  margin: 0;
+}
+.page-subtitle, .form-footer {
+  color: var(--muted);
+  font-weight: 750;
+}
+.stack-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.stack-form input, .profile-form input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 14px 16px;
+  font-weight: 850;
+  font: inherit;
+}
+.form-footer a, .inline-link {
+  color: var(--blue-dark);
+  font-weight: 950;
+}
+.page-status {
+  min-height: 22px;
+  font-weight: 850;
+}
+.page-status.error { color: #a53b2b; }
+.page-status.success { color: #167a3d; }
+.data-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+.empty-state {
+  color: var(--muted);
+  font-weight: 850;
+  text-align: center;
+  padding: 24px;
+}
+.past-game-card {
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 22px;
+  padding: 16px;
+}
+.past-game-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.past-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.past-pick {
+  background: rgba(255,255,255,.82);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 9px 10px;
+  display: grid;
+  gap: 3px;
+}
+.past-pick span {
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 900;
+}
+.past-pick strong { color: var(--text); }
+.past-pick em {
+  color: var(--blue-dark);
+  font-style: normal;
+  font-size: .78rem;
+  font-weight: 900;
+}
+.profile-card-inner {
+  display: grid;
+  gap: 22px;
+  margin-top: 20px;
+}
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.profile-stats div {
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 18px;
+  padding: 16px;
+  text-align: center;
+}
+.profile-stats strong {
+  display: block;
+  color: var(--blue-dark);
+  font-size: 2rem;
+  font-weight: 950;
+}
+.profile-stats span {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.profile-form {
+  display: grid;
+  gap: 10px;
+}
+.profile-form label {
+  color: var(--muted);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: .76rem;
+}
+@media (max-width: 760px) {
+  .site-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .site-nav, .account-nav, .nav-auth {
+    flex-wrap: wrap;
+  }
+  .nav-link, .nav-button, .nav-user {
+    padding: 9px 12px;
+    font-size: .9rem;
+  }
+  .past-pick-grid, .profile-stats {
+    grid-template-columns: 1fr;
+  }
+}

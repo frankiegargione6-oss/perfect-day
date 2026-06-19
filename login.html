@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Log In · Perfect Day</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body data-page="login">
+
+  <header class="site-header">
+    <a class="brand" href="/">Perfect Day</a>
+    <nav class="site-nav">
+      <a href="/leaderboard.html" class="nav-link"><span class="nav-icon">📊</span> Leaderboard</a>
+      <a href="/past-games.html" class="nav-link"><span class="nav-icon">🕘</span> Past Games</a>
+    </nav>
+    <div class="account-nav">
+      <div id="navGuest" class="nav-auth">
+        <a href="/signup.html" class="nav-button primary">Sign Up</a>
+        <a href="/login.html" class="nav-button">Log In</a>
+      </div>
+      <a id="navUser" href="/profile.html" class="nav-user hidden"><span class="profile-icon">👤</span><span id="navUsername">Profile</span></a>
+    </div>
+  </header>
+
+  <main class="app slim-app">
+    <section class="page-card auth-page-card">
+      <p class="eyebrow">Account</p>
+      <h1 class="page-title">Log In</h1>
+      <p class="page-subtitle">Log in to save Perfect Day scores and view your history.</p>
+      <form id="loginForm" class="stack-form">
+        <input id="loginEmail" type="email" placeholder="Email" autocomplete="email" required />
+        <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" required />
+        <button type="submit">Log In</button>
+      </form>
+      <p id="pageStatus" class="page-status"></p>
+      <p class="form-footer">Need an account? <a href="/signup.html">Sign up</a></p>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-app.js"></script>
+</body>
+</html>

@@ -6,61 +6,28 @@
   <title>Perfect Day</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
-<body>
+<body data-page="game">
+
+  <header class="site-header">
+    <a class="brand" href="/">Perfect Day</a>
+    <nav class="site-nav">
+      <a href="/leaderboard.html" class="nav-link"><span class="nav-icon">📊</span> Leaderboard</a>
+      <a href="/past-games.html" class="nav-link"><span class="nav-icon">🕘</span> Past Games</a>
+    </nav>
+    <div class="account-nav">
+      <div id="navGuest" class="nav-auth">
+        <a href="/signup.html" class="nav-button primary">Sign Up</a>
+        <a href="/login.html" class="nav-button">Log In</a>
+      </div>
+      <a id="navUser" href="/profile.html" class="nav-user hidden"><span class="profile-icon">👤</span><span id="navUsername">Profile</span></a>
+    </div>
+  </header>
   <main class="app">
     <section class="hero">
       <p class="eyebrow">Weather Draft Game</p>
       <h1>Perfect Day</h1>
       <p class="subtitle">Spin a U.S. region, pull a city, and draft one live NWS weather attribute to build your ideal day.</p>
     </section>
-
-
-    <section class="account-card">
-      <div>
-        <p class="eyebrow">Account</p>
-        <h2 id="accountTitle">Play as Guest</h2>
-        <p id="accountSubtitle" class="account-subtitle">Log in to save scores, appear on the leaderboard, and view past games.</p>
-      </div>
-
-      <div id="authForms" class="auth-forms">
-        <input id="emailInput" type="email" placeholder="Email" autocomplete="email" />
-        <input id="passwordInput" type="password" placeholder="Password" autocomplete="current-password" />
-        <input id="usernameInput" type="text" placeholder="Username" autocomplete="nickname" />
-        <button id="signUpBtn" type="button">Sign Up</button>
-        <button id="loginBtn" type="button" class="secondary">Log In</button>
-      </div>
-
-      <div id="userActions" class="auth-actions hidden">
-        <input id="usernameInputLoggedIn" type="text" placeholder="Username" autocomplete="nickname" />
-        <button id="saveUsernameBtn" type="button" class="secondary">Save Username</button>
-        <button id="leaderboardBtn" type="button">Leaderboard</button>
-        <button id="pastGamesBtn" type="button" class="secondary">Past Games</button>
-        <button id="logoutBtn" type="button" class="secondary">Log Out</button>
-      </div>
-    </section>
-
-    <section id="leaderboardPanel" class="data-panel hidden">
-      <div class="data-panel-top">
-        <div>
-          <p class="eyebrow">All-Time</p>
-          <h2>Leaderboard</h2>
-        </div>
-        <button id="closeLeaderboardBtn" type="button" class="secondary mini">Close</button>
-      </div>
-      <div id="leaderboardList" class="data-list">Loading leaderboard...</div>
-    </section>
-
-    <section id="pastGamesPanel" class="data-panel hidden">
-      <div class="data-panel-top">
-        <div>
-          <p class="eyebrow">Profile</p>
-          <h2>Past Games</h2>
-        </div>
-        <button id="closePastGamesBtn" type="button" class="secondary mini">Close</button>
-      </div>
-      <div id="pastGamesList" class="data-list">Loading past games...</div>
-    </section>
-
     <section class="mode-card">
       <label for="mode">Game Mode</label>
       <select id="mode">
@@ -195,5 +162,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
+  <script src="supabase-app.js"></script>
 </body>
 </html>

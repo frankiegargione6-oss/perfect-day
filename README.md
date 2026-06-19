@@ -79,3 +79,12 @@ Do not double-click `index.html`; the local server has to be running.
 - If the final remaining variable is missing and both player re-spins are already used, the game automatically re-rolls so the game can be completed.
 - Picked attributes now show the city name instead of the abbreviation / airport station code.
 - Leaderboard/accounts are not included yet; those require a database/auth backend.
+
+
+## v0.18 changes
+
+- Removed the large account box from the game page.
+- Added a standard top navigation bar.
+- Added separate pages for Sign Up, Log In, Leaderboard, Past Games, and Profile.
+- Leaderboard link uses a chart icon. Past Games link uses a clock/history icon.
+- Logged-in users see their username in the top-right profile button.
