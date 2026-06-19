@@ -889,6 +889,26 @@ function localSunsetTime(lat, lon, timezone) {
 }
 
 
+
+function remainingSlots() {
+  return slots.filter(slot => !usedSlots.has(slot));
+}
+
+function cardHasSlot(weather, slot) {
+  return !!(weather && weather.values && weather.values[slot] && weather.values[slot].value !== "Missing");
+}
+
+function shouldAutoRerollForFinalSlot(weather) {
+  const remaining = remainingSlots();
+  if (remaining.length !== 1) return false;
+
+  const finalSlot = remaining[0];
+  const noManualRespinsLeft = regionRespinUsed && cityRespinUsed;
+
+  return noManualRespinsLeft && !cardHasSlot(weather, finalSlot);
+}
+
+
 function isBrokenObservation(weather) {
   if (!weather || weather.source !== "Live NWS" || !weather.values) return true;
 
@@ -1198,7 +1218,7 @@ function renderBoard() {
       <span class="pick">
         ${item ? item.value : "—"}
         ${item && item.detail ? `<span class="source">${item.detail}</span>` : ""}
-        ${item ? `<span class="source">${item.abbr} · ${item.station}</span>` : ""}
+        ${item ? `<span class="source">${item.city}</span>` : ""}
         ${item ? `<span class="source">${item.note}</span>` : ""}
       </span>
     `;
@@ -1245,7 +1265,7 @@ function renderShareCard() {
         <div class="share-value">${item ? item.value : "—"}</div>
         ${item && item.detail ? `<div class="share-detail">${item.detail}</div>` : ""}
       </div>
-      <div class="share-source">${item ? `${item.abbr} · ${item.station}` : ""}</div>
+      <div class="share-source">${item ? item.city : ""}</div>
     `;
     els.shareCardGrid.appendChild(row);
   });
@@ -1286,9 +1306,11 @@ async function runSelection(region, city, options = {}) {
   const attemptKey = `${region}:${city.name}`;
   attempted.add(attemptKey);
 
-  if (isBrokenObservation(currentWeather) && attempted.size < maxAttempts) {
+  if ((isBrokenObservation(currentWeather) || shouldAutoRerollForFinalSlot(currentWeather)) && attempted.size < maxAttempts) {
     els.weatherCard.classList.add("hidden");
-    els.spinResult.innerHTML = buildCityFailureMessage(city, currentWeather.source || "missing data");
+    const missingFinal = shouldAutoRerollForFinalSlot(currentWeather);
+    const reason = missingFinal ? `missing final variable: ${remainingSlots()[0]}` : (currentWeather.source || "missing data");
+    els.spinResult.innerHTML = buildCityFailureMessage(city, reason);
 
     await wait(850);
 
@@ -1519,7 +1541,7 @@ function draft(label, item) {
     els.spinResult.innerHTML = `<p><strong>Perfect Day complete.</strong><br/>Your final card is ready.</p>`;
     openFinalModal();
   } else {
-    els.spinResult.innerHTML = `<p>Drafted <strong>${label}: ${item.value} · ${currentCity.abbr}</strong>.<br/>Spin again for the next round.</p>`;
+    els.spinResult.innerHTML = `<p>Drafted <strong>${label}: ${item.value} · ${currentCity.name}</strong>.<br/>Spin again for the next round.</p>`;
   }
 
   els.regionWheel.textContent = "—";
@@ -1536,7 +1558,7 @@ function copyBuild() {
   if (score) lines.push(`Score: ${score.total}/100 — ${score.tier}`);
   slots.forEach(slot => {
     const item = build[slot];
-    lines.push(item ? `${item.icon || ""} ${slot}: ${item.value}${item.detail ? ` (${item.detail})` : ""} · ${item.abbr} (${item.station}) — ${item.note}` : `${slot}: —`);
+    lines.push(item ? `${item.icon || ""} ${slot}: ${item.value}${item.detail ? ` (${item.detail})` : ""} · ${item.city} — ${item.note}` : `${slot}: —`);
   });
 
   navigator.clipboard.writeText(lines.join("\n")).then(() => {
@@ -1670,7 +1692,7 @@ async function downloadShareCard() {
     if (item?.detail) {
       drawText(item.detail, x + 66, rowY + 78, { size: 13, weight: 800, color: "#68768a" });
     }
-    drawText(item ? `${item.abbr} · ${item.station}` : "", x + 316, rowY + 58, { size: 13, weight: 950, color: "#164eb8", align: "right" });
+    drawText(item ? item.city : "", x + 316, rowY + 58, { size: 13, weight: 950, color: "#164eb8", align: "right" });
   });
 
   const footerY = 1030;

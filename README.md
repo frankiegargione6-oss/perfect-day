@@ -1,4 +1,4 @@
-# Perfect Day Prototype v0.15
+# Perfect Day Prototype v0.16
 
 ## New in v0.8
 
@@ -73,3 +73,9 @@ Do not double-click `index.html`; the local server has to be running.
 - Draft now has 6 variables.
 - Added Everyday scoring out of 100.
 - Added score tier to the final share card.
+
+## v0.16 changes
+
+- If the final remaining variable is missing and both player re-spins are already used, the game automatically re-rolls so the game can be completed.
+- Picked attributes now show the city name instead of the abbreviation / airport station code.
+- Leaderboard/accounts are not included yet; those require a database/auth backend.
