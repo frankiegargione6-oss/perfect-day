@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Leaderboard · Perfect Day</title>
+  <title>Achievements · Perfect Day</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
-<body data-page="leaderboard">
+<body data-page="achievements">
 
   <header class="site-header">
     <a class="brand" href="/">Perfect Day</a>
@@ -27,27 +27,11 @@
 
   <main class="app slim-app">
     <section class="page-card">
-      <div class="page-heading-row">
-        <div>
-          <p class="eyebrow">All-Time</p>
-          <h1 class="page-title"><span class="title-icon">📊</span> Leaderboard</h1>
-          <p class="page-subtitle">Best Perfect Day scores from logged-in players. Pick a mode to see each board.</p>
-        </div>
-        <div class="leaderboard-controls">
-          <label for="leaderboardMode">Mode</label>
-          <select id="leaderboardMode">
-            <option value="All Modes">All Modes</option>
-            <option value="Everyday">Everyday</option>
-            <option value="Beach Day">Beach Day</option>
-            <option value="Tailgate">Tailgate</option>
-            <option value="Golf Day">Golf Day</option>
-            <option value="Snow Day">Snow Day</option>
-            <option value="Storm Lover">Storm Lover</option>
-          </select>
-        </div>
-      </div>
-      <div id="leaderboardList" class="data-list">Loading leaderboard...</div>
-      <button id="viewMoreLeaderboardBtn" class="secondary leaderboard-more hidden" type="button">View More</button>
+      <p class="eyebrow">Trophy Case</p>
+      <h1 class="page-title"><span class="title-icon">🏆</span> Achievements</h1>
+      <p class="page-subtitle">Unlock badges by playing games, scoring high, and drafting extreme weather picks.</p>
+      <div id="achievementSummary" class="achievement-summary">Loading achievements...</div>
+      <div id="achievementsList" class="achievement-grid"></div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -903,9 +903,10 @@ function shouldAutoRerollForFinalSlot(weather) {
   if (remaining.length !== 1) return false;
 
   const finalSlot = remaining[0];
-  const noManualRespinsLeft = regionRespinUsed && cityRespinUsed;
 
-  return noManualRespinsLeft && !cardHasSlot(weather, finalSlot);
+  // Always auto-reroll if the final remaining variable is missing.
+  // This prevents players from being blocked at the end, even if they still had manual respins.
+  return !cardHasSlot(weather, finalSlot);
 }
 
 

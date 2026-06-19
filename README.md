@@ -81,7 +81,7 @@ Do not double-click `index.html`; the local server has to be running.
 - Leaderboard/accounts are not included yet; those require a database/auth backend.
 
 
-## v0.18 changes
+## v0.19 changes
 
 - Removed the large account box from the game page.
 - Added a standard top navigation bar.
@@ -90,5 +90,15 @@ Do not double-click `index.html`; the local server has to be running.
 - Logged-in users see their username in the top-right profile button.
 
 
-## v0.18.2
+## v0.19.2
 - Fixed login hang caused by Supabase auth state callback awaiting profile/database calls during sign-in.
+
+
+## v0.19 changes
+
+- Added XP and leveling based on lifetime score XP.
+- Added mode-specific leaderboard dropdown.
+- Leaderboard now shows top 20 first, highlights your row, and shows your position if below top 20.
+- Added dark mode toggle saved locally.
+- Added Achievements page.
+- Final missing-variable auto-reroll now triggers whenever the final slot is missing.
