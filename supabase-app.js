@@ -125,19 +125,38 @@ async function signUpWithEmail() {
   }
 }
 
+function withTimeout(promise, ms = 12000, label = "Request timed out. Refresh and try again.") {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(label)), ms))
+  ]);
+}
+
 async function loginWithEmail() {
   const email = $("loginEmail")?.value.trim();
   const password = $("loginPassword")?.value || "";
 
   if (!email || !password) return setStatus("Enter email and password.", "error");
+  if (!supabaseClient) return setStatus("Supabase did not load. Refresh and try again.", "error");
 
   setStatus("Logging in...", "info");
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error) return setStatus(error.message, "error");
 
-  await refreshNav();
-  setStatus("Logged in. Sending you to the game...", "success");
-  setTimeout(() => window.location.href = "/", 500);
+  try {
+    const { data, error } = await withTimeout(
+      supabaseClient.auth.signInWithPassword({ email, password }),
+      12000,
+      "Login timed out. Refresh and try again."
+    );
+
+    if (error) return setStatus(error.message, "error");
+    if (!data?.session) return setStatus("Login did not return a session. Try signing up again or check email confirmation settings.", "error");
+
+    loggedInUser = data.session.user;
+    setStatus("Logged in. Sending you to the game...", "success");
+    window.location.href = "/";
+  } catch (error) {
+    setStatus(error.message || "Login failed. Refresh and try again.", "error");
+  }
 }
 
 async function logout() {
