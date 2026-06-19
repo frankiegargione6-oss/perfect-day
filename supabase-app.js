@@ -1,4 +1,4 @@
-// Perfect Day v0.18 Supabase auth, profile, leaderboard, and past-games pages
+// Perfect Day v0.21 Supabase auth, profiles, friends, head-to-head, leaderboard, daily challenge
 const SUPABASE_URL = "https://naphnmpmujupkfpkuhhu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hcGhubXBtdWp1cGtmcGt1aGh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MjQ2MjksImV4cCI6MjA5NzQwMDYyOX0.voAllZifeoMqMGvCJaeIyE1XX2lt6KNElPkXXfJ5_OA";
 
@@ -13,6 +13,13 @@ function isDailyChallengePage() { return pageName() === "daily-challenge"; }
 function todayKey(date = new Date()) { return date.toLocaleDateString("en-CA"); }
 function startOfTodayISO() { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString(); }
 function startOfTomorrowISO() { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+1); return d.toISOString(); }
+function urlParam(name) { return new URLSearchParams(window.location.search).get(name); }
+function escapeHtml(value) {
+  const div = document.createElement('div');
+  div.textContent = String(value || '');
+  return div.innerHTML;
+}
+function profileLink(id, username) { return `<a class="inline-link" href="/public-profile.html?id=${encodeURIComponent(id)}">${escapeHtml(username || 'Player')}</a>`; }
 
 function applyTheme(theme) {
   const finalTheme = theme === "dark" ? "dark" : "light";
@@ -279,6 +286,8 @@ async function saveCompletedGame() {
     return;
   }
 
+  await saveH2HResult(score, build);
+
   lastSavedGameSignature = signature;
   if (mode === "Daily Challenge") {
     await loadDailyChallenge();
@@ -347,7 +356,7 @@ function renderLeaderboard() {
       <div class="data-row leaderboard-row ${isMe ? "is-me" : ""}">
         <div class="data-rank">#${realRank}</div>
         <div>
-          <div class="data-main">${row.username} <span class="level-pill">Lv. ${row.levelInfo.level}</span></div>
+          <div class="data-main">${profileLink(row.user_id, row.username)} <span class="level-pill">Lv. ${row.levelInfo.level}</span></div>
           <div class="data-sub">${cachedLeaderboardMode} · ${row.bestTier} · ${row.games} game${row.games === 1 ? "" : "s"} · ${row.levelInfo.totalXp} XP</div>
         </div>
         <div class="data-score">${row.bestScore}/100</div>
@@ -483,6 +492,181 @@ function getAchievementDefinitions(scores) {
   ];
 }
 
+async function getFriendRows() {
+  if (!loggedInUser || !supabaseClient) return [];
+  const { data, error } = await supabaseClient
+    .from("friendships")
+    .select("friend_id, created_at, friend:profiles!friendships_friend_id_fkey(id, username)")
+    .eq("user_id", loggedInUser.id)
+    .order("created_at", { ascending: false });
+  if (error) { console.warn("Friend load failed:", error.message); return []; }
+  return data || [];
+}
+async function getFriendIdSet() { const rows = await getFriendRows(); return new Set(rows.map(row => row.friend_id)); }
+async function searchPlayers(event) {
+  event?.preventDefault();
+  const results = $("friendSearchResults");
+  if (!results) return;
+  if (!loggedInUser) { results.innerHTML = `<div class="empty-state">Log in to search for friends.</div>`; return; }
+  const q = cleanUsername($("friendSearchInput")?.value || "");
+  if (!q) return setStatus("Enter a username to search.", "error");
+  results.innerHTML = "Searching...";
+  const friendIds = await getFriendIdSet();
+  const { data, error } = await supabaseClient.from("profiles").select("id, username").ilike("username", `%${q}%`).limit(12);
+  if (error) { results.textContent = error.message; return; }
+  const rows = (data || []).filter(p => p.id !== loggedInUser.id);
+  if (!rows.length) { results.innerHTML = `<div class="empty-state">No players found.</div>`; return; }
+  results.innerHTML = rows.map(player => {
+    const alreadyFriends = friendIds.has(player.id);
+    return `<div class="data-row social-row"><div class="data-rank">👤</div><div><div class="data-main">${profileLink(player.id, player.username)}</div><div class="data-sub">${alreadyFriends ? "Already friends" : "Send a friend request"}</div></div><button class="mini ${alreadyFriends ? "secondary" : ""}" data-add-friend="${player.id}" ${alreadyFriends ? "disabled" : ""}>${alreadyFriends ? "Friends" : "Add"}</button></div>`;
+  }).join("");
+  results.querySelectorAll("[data-add-friend]").forEach(btn => btn.addEventListener("click", () => sendFriendRequest(btn.dataset.addFriend)));
+}
+async function sendFriendRequest(receiverId) {
+  if (!loggedInUser) return setStatus("Log in first.", "error");
+  if (!receiverId || receiverId === loggedInUser.id) return setStatus("Pick another player.", "error");
+  setStatus("Sending request...", "info");
+  const { error } = await supabaseClient.from("friend_requests").insert({ requester_id: loggedInUser.id, receiver_id: receiverId, status: "pending" });
+  if (error) return setStatus(error.message.includes("duplicate") ? "Friend request already sent." : error.message, "error");
+  setStatus("Friend request sent.", "success");
+  await loadFriendsPage();
+}
+async function acceptFriendRequest(requestId, requesterId) {
+  if (!loggedInUser) return;
+  setStatus("Accepting request...", "info");
+  const { error: updateError } = await supabaseClient.from("friend_requests").update({ status: "accepted", updated_at: new Date().toISOString() }).eq("id", requestId);
+  if (updateError) return setStatus(updateError.message, "error");
+  const { error: insertError } = await supabaseClient.from("friendships").upsert([{ user_id: loggedInUser.id, friend_id: requesterId }, { user_id: requesterId, friend_id: loggedInUser.id }], { onConflict: "user_id,friend_id" });
+  if (insertError) return setStatus(insertError.message, "error");
+  setStatus("Friend request accepted.", "success");
+  await loadFriendsPage();
+}
+async function declineFriendRequest(requestId) {
+  if (!loggedInUser) return;
+  const { error } = await supabaseClient.from("friend_requests").update({ status: "declined", updated_at: new Date().toISOString() }).eq("id", requestId);
+  if (error) return setStatus(error.message, "error");
+  await loadFriendsPage();
+}
+async function loadFriendRequests() {
+  const list = $("friendRequestsList");
+  if (!list) return;
+  if (!loggedInUser) { list.innerHTML = `<div class="empty-state">Log in to manage friend requests.</div>`; return; }
+  const { data, error } = await supabaseClient.from("friend_requests").select("id, requester_id, receiver_id, status, created_at, requester:profiles!friend_requests_requester_id_fkey(id, username), receiver:profiles!friend_requests_receiver_id_fkey(id, username)").or(`requester_id.eq.${loggedInUser.id},receiver_id.eq.${loggedInUser.id}`).eq("status", "pending").order("created_at", { ascending: false });
+  if (error) { list.textContent = error.message; return; }
+  if (!data || !data.length) { list.innerHTML = `<div class="empty-state">No pending requests.</div>`; return; }
+  list.innerHTML = data.map(req => {
+    const incoming = req.receiver_id === loggedInUser.id;
+    const other = incoming ? req.requester : req.receiver;
+    return `<div class="data-row social-row"><div class="data-rank">${incoming ? "📩" : "📤"}</div><div><div class="data-main">${profileLink(other?.id, other?.username)}</div><div class="data-sub">${incoming ? "Wants to be friends" : "Request sent"}</div></div><div class="row-actions">${incoming ? `<button class="mini" data-accept-request="${req.id}" data-requester="${req.requester_id}">Accept</button><button class="mini secondary" data-decline-request="${req.id}">Deny</button>` : `<span class="badge small-badge">Pending</span>`}</div></div>`;
+  }).join("");
+  list.querySelectorAll("[data-accept-request]").forEach(btn => btn.addEventListener("click", () => acceptFriendRequest(btn.dataset.acceptRequest, btn.dataset.requester)));
+  list.querySelectorAll("[data-decline-request]").forEach(btn => btn.addEventListener("click", () => declineFriendRequest(btn.dataset.declineRequest)));
+}
+async function loadFriendsList(targetId = null, containerId = "friendsList") {
+  const list = $(containerId);
+  if (!list || !supabaseClient) return [];
+  const userId = targetId || loggedInUser?.id;
+  if (!userId) { list.innerHTML = `<div class="empty-state">Log in to view friends.</div>`; return []; }
+  const { data, error } = await supabaseClient.from("friendships").select("friend_id, created_at, friend:profiles!friendships_friend_id_fkey(id, username)").eq("user_id", userId).order("created_at", { ascending: false });
+  if (error) { list.textContent = error.message; return []; }
+  if (!data || !data.length) { list.innerHTML = `<div class="empty-state">No friends yet.</div>`; return []; }
+  list.innerHTML = data.map(row => `<div class="data-row social-row"><div class="data-rank">🤝</div><div><div class="data-main">${profileLink(row.friend?.id, row.friend?.username)}</div><div class="data-sub">Friend since ${new Date(row.created_at).toLocaleDateString()}</div></div><a class="nav-button" href="/head-to-head.html">Challenge</a></div>`).join("");
+  return data;
+}
+async function loadFriendsPage() { $("friendSearchForm")?.addEventListener("submit", searchPlayers); await loadFriendRequests(); await loadFriendsList(); }
+async function renderProfileFriendsPreview() { const el = $("profileFriendsList"); if (!el) return; await loadFriendsList(loggedInUser?.id, "profileFriendsList"); }
+async function loadPublicProfile() {
+  const box = $("publicProfileContent");
+  if (!box || !supabaseClient) return;
+  const playerId = urlParam("id");
+  if (!playerId) { box.innerHTML = `<div class="empty-state">No player selected.</div>`; return; }
+  const { data: profile, error } = await supabaseClient.from("profiles").select("id, username, created_at").eq("id", playerId).maybeSingle();
+  if (error || !profile) { box.innerHTML = `<div class="empty-state">Player not found.</div>`; return; }
+  const { data: scores } = await supabaseClient.from("game_scores").select("score, mode, score_tier, created_at").eq("user_id", playerId).eq("completed", true).limit(1000);
+  const games = scores || [];
+  const bestScore = games.length ? Math.max(...games.map(s => s.score || 0)) : 0;
+  const avgScore = games.length ? Math.round(games.reduce((sum, s) => sum + (s.score || 0), 0) / games.length) : 0;
+  const totalXp = games.reduce((sum, s) => sum + scoreToXp(s.score), 0);
+  const levelInfo = calculateLevel(totalXp);
+  const friendIds = loggedInUser ? await getFriendIdSet() : new Set();
+  const isMe = loggedInUser?.id === playerId;
+  const friendButton = isMe ? `<a class="nav-button" href="/profile.html">Your Profile</a>` : (loggedInUser ? `<button id="publicAddFriendBtn" type="button" ${friendIds.has(playerId) ? "disabled" : ""}>${friendIds.has(playerId) ? "Already Friends" : "Add Friend"}</button>` : `<a class="nav-button primary" href="/login.html">Log in to add friend</a>`);
+  box.innerHTML = `<div class="profile-card-inner"><div><p class="eyebrow">Player Profile</p><h2>${escapeHtml(profile.username)} <span class="level-pill big">Lv. ${levelInfo.level}</span></h2><p class="account-subtitle">${totalXp} XP · Joined ${new Date(profile.created_at).toLocaleDateString()}</p></div><div class="profile-stats"><div><strong>${games.length}</strong><span>Games</span></div><div><strong>${bestScore}</strong><span>Best</span></div><div><strong>${avgScore}</strong><span>Avg</span></div></div><div>${friendButton}</div><div class="social-section"><div class="page-heading-row"><div><p class="eyebrow">Friends</p><h2>Friend List</h2></div></div><div id="publicFriendsList" class="data-list">Loading friends...</div></div></div>`;
+  $("publicAddFriendBtn")?.addEventListener("click", () => sendFriendRequest(playerId));
+  await loadFriendsList(playerId, "publicFriendsList");
+}
+async function populateH2HFriendSelect() {
+  const select = $("h2hFriendSelect");
+  if (!select) return;
+  const rows = await getFriendRows();
+  if (!rows.length) { select.innerHTML = `<option value="">Add friends first</option>`; return; }
+  select.innerHTML = `<option value="">Choose friend</option>` + rows.map(row => `<option value="${row.friend_id}">${escapeHtml(row.friend?.username || "Friend")}</option>`).join("");
+}
+async function createH2HMatch(event) {
+  event?.preventDefault();
+  if (!loggedInUser) return setStatus("Log in first.", "error");
+  const opponentId = $("h2hFriendSelect")?.value;
+  const mode = $("h2hModeSelect")?.value || "Everyday";
+  if (!opponentId) return setStatus("Choose a friend to challenge.", "error");
+  const { error } = await supabaseClient.from("h2h_matches").insert({ challenger_id: loggedInUser.id, opponent_id: opponentId, mode, status: "pending" });
+  if (error) return setStatus(error.message, "error");
+  setStatus("Challenge sent.", "success");
+  await loadH2HMatches();
+}
+async function acceptH2H(matchId) { const { error } = await supabaseClient.from("h2h_matches").update({ status: "accepted", updated_at: new Date().toISOString() }).eq("id", matchId); if (error) return setStatus(error.message, "error"); await loadH2HMatches(); }
+async function declineH2H(matchId) { const { error } = await supabaseClient.from("h2h_matches").update({ status: "declined", updated_at: new Date().toISOString() }).eq("id", matchId); if (error) return setStatus(error.message, "error"); await loadH2HMatches(); }
+function h2hWinnerText(match) { if (match.status !== "completed") return match.status; if (match.winner_id === loggedInUser?.id) return "You won"; if (!match.winner_id) return "Tie"; return "You lost"; }
+async function loadH2HMatches() {
+  const list = $("h2hMatchesList");
+  if (!list) return;
+  if (!loggedInUser) { list.innerHTML = `<div class="empty-state">Log in to view head-to-head matches.</div>`; return; }
+  const { data, error } = await supabaseClient.from("h2h_matches").select("*, challenger:profiles!h2h_matches_challenger_id_fkey(id, username), opponent:profiles!h2h_matches_opponent_id_fkey(id, username)").or(`challenger_id.eq.${loggedInUser.id},opponent_id.eq.${loggedInUser.id}`).order("created_at", { ascending: false }).limit(50);
+  if (error) { list.textContent = error.message; return; }
+  if (!data || !data.length) { list.innerHTML = `<div class="empty-state">No matches yet. Challenge a friend above.</div>`; return; }
+  list.innerHTML = data.map(match => {
+    const amChallenger = match.challenger_id === loggedInUser.id;
+    const other = amChallenger ? match.opponent : match.challenger;
+    const myScore = amChallenger ? match.challenger_score : match.opponent_score;
+    const theirScore = amChallenger ? match.opponent_score : match.challenger_score;
+    const canAccept = !amChallenger && match.status === "pending";
+    const canPlay = match.status === "accepted" && (myScore === null || myScore === undefined);
+    const playUrl = `/?h2h=${match.id}&mode=${encodeURIComponent(match.mode || "Everyday")}`;
+    return `<div class="data-row social-row h2h-row"><div class="data-rank">⚔️</div><div><div class="data-main">vs ${profileLink(other?.id, other?.username)}</div><div class="data-sub">${match.mode || "Everyday"} · ${h2hWinnerText(match)} · You: ${myScore ?? "—"} · Them: ${theirScore ?? "—"}</div></div><div class="row-actions">${canAccept ? `<button class="mini" data-accept-h2h="${match.id}">Accept</button><button class="mini secondary" data-decline-h2h="${match.id}">Deny</button>` : ""}${canPlay ? `<a class="nav-button primary" href="${playUrl}">Play</a>` : ""}${match.status === "pending" && amChallenger ? `<span class="badge small-badge">Waiting</span>` : ""}</div></div>`;
+  }).join("");
+  list.querySelectorAll("[data-accept-h2h]").forEach(btn => btn.addEventListener("click", () => acceptH2H(btn.dataset.acceptH2h)));
+  list.querySelectorAll("[data-decline-h2h]").forEach(btn => btn.addEventListener("click", () => declineH2H(btn.dataset.declineH2h)));
+}
+async function loadH2HPage() { $("h2hCreateForm")?.addEventListener("submit", createH2HMatch); await populateH2HFriendSelect(); await loadH2HMatches(); }
+async function setupHeadToHeadGame() {
+  if (pageName() !== "game") return;
+  const matchId = urlParam("h2h");
+  if (!matchId) return;
+  const mode = urlParam("mode") || "Everyday";
+  if ($("mode")) { $("mode").value = mode; $("mode").disabled = true; }
+  if (typeof els !== "undefined" && els.modeBadge) els.modeBadge.textContent = mode;
+  const heroSub = document.querySelector(".subtitle");
+  if (heroSub) heroSub.textContent = "Head-to-Head match: finish one run and your score will be saved to the match.";
+  if (!loggedInUser) alert("Log in before playing a head-to-head match so your score can save.");
+}
+async function saveH2HResult(score, gameData) {
+  const matchId = urlParam("h2h");
+  if (!matchId || !loggedInUser || !supabaseClient) return;
+  const { data: match, error } = await supabaseClient.from("h2h_matches").select("*").eq("id", matchId).maybeSingle();
+  if (error || !match) { alert("Head-to-head match not found."); return; }
+  const amChallenger = match.challenger_id === loggedInUser.id;
+  const amOpponent = match.opponent_id === loggedInUser.id;
+  if (!amChallenger && !amOpponent) { alert("You are not in this match."); return; }
+  const update = { updated_at: new Date().toISOString() };
+  if (amChallenger) { update.challenger_score = score.total; update.challenger_game_data = gameData; }
+  if (amOpponent) { update.opponent_score = score.total; update.opponent_game_data = gameData; }
+  const finalChallenger = amChallenger ? score.total : match.challenger_score;
+  const finalOpponent = amOpponent ? score.total : match.opponent_score;
+  if (finalChallenger !== null && finalChallenger !== undefined && finalOpponent !== null && finalOpponent !== undefined) { update.status = "completed"; update.winner_id = finalChallenger === finalOpponent ? null : (finalChallenger > finalOpponent ? match.challenger_id : match.opponent_id); } else { update.status = "accepted"; }
+  const { error: updateError } = await supabaseClient.from("h2h_matches").update(update).eq("id", matchId);
+  if (updateError) alert(`Head-to-head score did not save: ${updateError.message}`);
+}
+
+
 async function getUserScores() {
   if (!loggedInUser || !supabaseClient) return [];
   const { data, error } = await supabaseClient
@@ -542,11 +726,16 @@ async function loadProfile() {
         <button id="saveProfileUsernameBtn" type="button">Save Username</button>
         <button id="profileLogoutBtn" type="button" class="secondary">Log Out</button>
       </div>
+      <div class="social-section">
+        <div class="page-heading-row"><div><p class="eyebrow">Friends</p><h2>Your Friends</h2></div><a class="nav-button" href="/friends.html">Manage Friends</a></div>
+        <div id="profileFriendsList" class="data-list">Loading friends...</div>
+      </div>
     </div>
   `;
 
   $("saveProfileUsernameBtn")?.addEventListener("click", saveUsername);
   $("profileLogoutBtn")?.addEventListener("click", logout);
+  await renderProfileFriendsPreview();
 }
 
 async function loadAchievements() {
@@ -645,7 +834,7 @@ async function loadDailyScores() {
     return `<div class="data-row leaderboard-row ${isMe ? "is-me" : ""}">
       <div class="data-rank">#${idx + 1}</div>
       <div>
-        <div class="data-main">${row.profiles?.username || "Unknown Player"}</div>
+        <div class="data-main">${profileLink(row.user_id, row.profiles?.username || "Unknown Player")}</div>
         <div class="data-sub">${row.score_tier || "Completed"} · ${new Date(row.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</div>
       </div>
       <div class="data-score">${row.score}/100</div>
@@ -737,6 +926,10 @@ async function routePageLoad() {
   if (page === "profile") await loadProfile();
   if (page === "achievements") await loadAchievements();
   if (page === "daily-challenge") await loadDailyChallenge();
+  if (page === "friends") await loadFriendsPage();
+  if (page === "public-profile") await loadPublicProfile();
+  if (page === "head-to-head") await loadH2HPage();
+  if (page === "game") await setupHeadToHeadGame();
 }
 
 function bindPageButtons() {

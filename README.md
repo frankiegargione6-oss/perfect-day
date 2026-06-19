@@ -103,14 +103,11 @@ Do not double-click `index.html`; the local server has to be running.
 - Added Achievements page.
 - Final missing-variable auto-reroll now triggers whenever the final slot is missing.
 
-## v0.20 changes
+## v0.21 changes
 
-- Added Daily Challenge page.
-- Added one daily completed attempt per account.
-- Added Daily Challenge history/calendar panel.
-- Added Daily Challenge streak.
-- Added today's Daily scores panel.
-- Added Daily Challenge to mode leaderboard filter.
-- Dark mode re-spin buttons are darker.
-
-Run `supabase_daily_update.sql` in Supabase before deploying.
+- Added Friends page with username search, friend requests, accept/deny invites, and friends list.
+- Added public player profiles.
+- Added Friends section to the profile page.
+- Added Head-to-Head page for friend challenges.
+- Head-to-head matches support pending invites, accepting/declining, one run per player, and winner tracking.
+- Added `supabase_social_update.sql` for the new social tables.

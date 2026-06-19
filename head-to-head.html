@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profile · Perfect Day</title>
+  <title>Head-to-Head · Perfect Day</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
-<body data-page="profile">
-
+<body data-page="head-to-head">
   <header class="site-header">
     <a class="brand" href="/">Perfect Day</a>
     <nav class="site-nav">
@@ -20,21 +19,35 @@
     </nav>
     <div class="account-nav">
       <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
-      <div id="navGuest" class="nav-auth">
-        <a href="/signup.html" class="nav-button primary">Sign Up</a>
-        <a href="/login.html" class="nav-button">Log In</a>
-      </div>
+      <div id="navGuest" class="nav-auth"><a href="/signup.html" class="nav-button primary">Sign Up</a><a href="/login.html" class="nav-button">Log In</a></div>
       <a id="navUser" href="/profile.html" class="nav-user hidden"><span class="profile-icon">👤</span><span id="navUsername">Profile</span></a>
     </div>
   </header>
-
   <main class="app slim-app">
+    <section class="hero">
+      <p class="eyebrow">Versus Mode</p>
+      <h1 class="page-title">Head-to-Head</h1>
+      <p class="subtitle">Challenge a friend. Both players complete one game, highest score wins.</p>
+    </section>
     <section class="page-card">
-      <p class="eyebrow">Account</p>
-      <h1 class="page-title"><span class="title-icon">👤</span> Profile</h1>
-      <p class="page-subtitle">Manage your username and see your basic stats.</p>
-      <div id="profileContent">Loading profile...</div>
+      <div class="page-heading-row"><div><p class="eyebrow">Create match</p><h2>Challenge a Friend</h2></div></div>
+      <form id="h2hCreateForm" class="stack-form inline-form">
+        <select id="h2hFriendSelect"><option value="">Loading friends...</option></select>
+        <select id="h2hModeSelect">
+          <option value="Everyday">Everyday</option>
+          <option value="Beach Day">Beach Day</option>
+          <option value="Tailgate">Tailgate</option>
+          <option value="Golf Day">Golf Day</option>
+          <option value="Snow Day">Snow Day</option>
+          <option value="Storm Lover">Storm Lover</option>
+        </select>
+        <button type="submit">Send Challenge</button>
+      </form>
       <p id="pageStatus" class="page-status"></p>
+    </section>
+    <section class="page-card social-section">
+      <div class="page-heading-row"><div><p class="eyebrow">Active</p><h2>Your Matches</h2></div></div>
+      <div id="h2hMatchesList" class="data-list">Loading matches...</div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

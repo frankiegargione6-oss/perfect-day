@@ -1041,3 +1041,42 @@ button.mini {
   .daily-top-grid { grid-template-columns: 1fr; }
   .daily-status-card { align-items: flex-start; flex-direction: column; }
 }
+
+/* v0.21: friends + head-to-head */
+.social-section { margin-top: 22px; }
+.inline-form {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.inline-form select,
+.inline-form input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 14px 16px;
+  font-weight: 850;
+  font: inherit;
+}
+#h2hCreateForm { grid-template-columns: minmax(0, 1fr) minmax(160px, 220px) auto; }
+.row-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.small-badge {
+  font-size: .72rem;
+  padding: 7px 10px;
+}
+.social-row .nav-button { box-shadow: none; }
+.h2h-row { grid-template-columns: 58px 1fr auto; }
+:root[data-theme="dark"] .inline-form input,
+:root[data-theme="dark"] .inline-form select { background: #0d1828; color: var(--text); border-color: var(--border); }
+@media (max-width: 760px) {
+  .inline-form, #h2hCreateForm { grid-template-columns: 1fr; }
+  .social-row, .h2h-row { grid-template-columns: 44px 1fr; }
+  .social-row .row-actions, .h2h-row .row-actions { grid-column: 2; justify-content: flex-start; }
+}

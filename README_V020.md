@@ -11,6 +11,6 @@ New features:
 - Daily history/calendar panel
 - Daily streak display
 - Daily Challenge added to leaderboard mode dropdown
-- Dark mode re-spin buttons adjusted darker
+- Dark mode respin buttons adjusted darker
 
 Friends and head-to-head are planned for the next update.

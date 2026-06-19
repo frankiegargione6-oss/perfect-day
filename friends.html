@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profile · Perfect Day</title>
+  <title>Friends · Perfect Day</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
-<body data-page="profile">
-
+<body data-page="friends">
   <header class="site-header">
     <a class="brand" href="/">Perfect Day</a>
     <nav class="site-nav">
@@ -27,14 +26,36 @@
       <a id="navUser" href="/profile.html" class="nav-user hidden"><span class="profile-icon">👤</span><span id="navUsername">Profile</span></a>
     </div>
   </header>
-
   <main class="app slim-app">
+    <section class="hero">
+      <p class="eyebrow">Social</p>
+      <h1 class="page-title">Friends</h1>
+      <p class="subtitle">Search players, send friend requests, and manage invites.</p>
+    </section>
+
     <section class="page-card">
-      <p class="eyebrow">Account</p>
-      <h1 class="page-title"><span class="title-icon">👤</span> Profile</h1>
-      <p class="page-subtitle">Manage your username and see your basic stats.</p>
-      <div id="profileContent">Loading profile...</div>
+      <div class="page-heading-row">
+        <div>
+          <p class="eyebrow">Find players</p>
+          <h2>Add Friends</h2>
+        </div>
+      </div>
+      <form id="friendSearchForm" class="stack-form inline-form">
+        <input id="friendSearchInput" type="text" placeholder="Search username" />
+        <button type="submit">Search</button>
+      </form>
       <p id="pageStatus" class="page-status"></p>
+      <div id="friendSearchResults" class="data-list"></div>
+    </section>
+
+    <section class="page-card social-section">
+      <div class="page-heading-row"><div><p class="eyebrow">Requests</p><h2>Friend Invites</h2></div></div>
+      <div id="friendRequestsList" class="data-list">Loading requests...</div>
+    </section>
+
+    <section class="page-card social-section">
+      <div class="page-heading-row"><div><p class="eyebrow">Your circle</p><h2>Friends List</h2></div></div>
+      <div id="friendsList" class="data-list">Loading friends...</div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
