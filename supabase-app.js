@@ -590,8 +590,11 @@ async function loadPublicProfile() {
   const levelInfo = calculateLevel(totalXp);
   const friendIds = loggedInUser ? await getFriendIdSet() : new Set();
   const isMe = loggedInUser?.id === playerId;
+  const overallH2H = loggedInUser ? await getH2HStats(playerId) : { wins: 0, losses: 0, ties: 0 };
+  const vsStats = loggedInUser && !isMe ? await getH2HStats(loggedInUser.id, playerId) : null;
+  const vsBlock = vsStats ? `<div class="social-section compact"><p class="eyebrow">Head-to-Head vs ${escapeHtml(profile.username)}</p><h2>${vsStats.wins}-${vsStats.losses}${vsStats.ties ? `-${vsStats.ties}` : ""}</h2><p class="account-subtitle">Your record against this player</p></div>` : "";
   const friendButton = isMe ? `<a class="nav-button" href="/profile.html">Your Profile</a>` : (loggedInUser ? `<button id="publicAddFriendBtn" type="button" ${friendIds.has(playerId) ? "disabled" : ""}>${friendIds.has(playerId) ? "Already Friends" : "Add Friend"}</button>` : `<a class="nav-button primary" href="/login.html">Log in to add friend</a>`);
-  box.innerHTML = `<div class="profile-card-inner"><div><p class="eyebrow">Player Profile</p><h2>${escapeHtml(profile.username)} <span class="level-pill big">Lv. ${levelInfo.level}</span></h2><p class="account-subtitle">${totalXp} XP · Joined ${new Date(profile.created_at).toLocaleDateString()}</p></div><div class="profile-stats"><div><strong>${games.length}</strong><span>Games</span></div><div><strong>${bestScore}</strong><span>Best</span></div><div><strong>${avgScore}</strong><span>Avg</span></div></div><div>${friendButton}</div><div class="social-section"><div class="page-heading-row"><div><p class="eyebrow">Friends</p><h2>Friend List</h2></div></div><div id="publicFriendsList" class="data-list">Loading friends...</div></div></div>`;
+  box.innerHTML = `<div class="profile-card-inner"><div><p class="eyebrow">Player Profile</p><h2>${escapeHtml(profile.username)} <span class="level-pill big">Lv. ${levelInfo.level}</span></h2><p class="account-subtitle">${totalXp} XP · Joined ${new Date(profile.created_at).toLocaleDateString()}</p></div><div class="profile-stats"><div><strong>${games.length}</strong><span>Games</span></div><div><strong>${bestScore}</strong><span>Best</span></div><div><strong>${avgScore}</strong><span>Avg</span></div><div><strong>${overallH2H.wins}-${overallH2H.losses}${overallH2H.ties ? `-${overallH2H.ties}` : ""}</strong><span>H2H</span></div></div><div>${friendButton}</div>${vsBlock}<div class="social-section"><div class="page-heading-row"><div><p class="eyebrow">Friends</p><h2>Friend List</h2></div></div><div id="publicFriendsList" class="data-list">Loading friends...</div></div></div>`;
   $("publicAddFriendBtn")?.addEventListener("click", () => sendFriendRequest(playerId));
   await loadFriendsList(playerId, "publicFriendsList");
 }
@@ -616,6 +619,35 @@ async function createH2HMatch(event) {
 async function acceptH2H(matchId) { const { error } = await supabaseClient.from("h2h_matches").update({ status: "accepted", updated_at: new Date().toISOString() }).eq("id", matchId); if (error) return setStatus(error.message, "error"); await loadH2HMatches(); }
 async function declineH2H(matchId) { const { error } = await supabaseClient.from("h2h_matches").update({ status: "declined", updated_at: new Date().toISOString() }).eq("id", matchId); if (error) return setStatus(error.message, "error"); await loadH2HMatches(); }
 function h2hWinnerText(match) { if (match.status !== "completed") return match.status; if (match.winner_id === loggedInUser?.id) return "You won"; if (!match.winner_id) return "Tie"; return "You lost"; }
+function h2hResultClass(match) {
+  if (match.status !== "completed") return "";
+  if (!match.winner_id) return "h2h-tie";
+  return match.winner_id === loggedInUser?.id ? "h2h-win" : "h2h-loss";
+}
+async function getH2HStats(userId = loggedInUser?.id, opponentId = null) {
+  if (!userId || !supabaseClient) return { wins: 0, losses: 0, ties: 0, played: 0 };
+  const { data, error } = await supabaseClient
+    .from("h2h_matches")
+    .select("challenger_id, opponent_id, winner_id, status")
+    .eq("status", "completed")
+    .or(`challenger_id.eq.${userId},opponent_id.eq.${userId}`)
+    .limit(1000);
+  if (error) {
+    console.warn("H2H stats failed:", error.message);
+    return { wins: 0, losses: 0, ties: 0, played: 0 };
+  }
+  const rows = (data || []).filter(row => {
+    if (!opponentId) return true;
+    return (row.challenger_id === userId && row.opponent_id === opponentId) || (row.opponent_id === userId && row.challenger_id === opponentId);
+  });
+  let wins = 0, losses = 0, ties = 0;
+  rows.forEach(row => {
+    if (!row.winner_id) ties += 1;
+    else if (row.winner_id === userId) wins += 1;
+    else losses += 1;
+  });
+  return { wins, losses, ties, played: rows.length };
+}
 async function loadH2HMatches() {
   const list = $("h2hMatchesList");
   if (!list) return;
@@ -631,7 +663,7 @@ async function loadH2HMatches() {
     const canAccept = !amChallenger && match.status === "pending";
     const canPlay = match.status === "accepted" && (myScore === null || myScore === undefined);
     const playUrl = `/?h2h=${match.id}&mode=${encodeURIComponent(match.mode || "Everyday")}`;
-    return `<div class="data-row social-row h2h-row"><div class="data-rank">⚔️</div><div><div class="data-main">vs ${profileLink(other?.id, other?.username)}</div><div class="data-sub">${match.mode || "Everyday"} · ${h2hWinnerText(match)} · You: ${myScore ?? "—"} · Them: ${theirScore ?? "—"}</div></div><div class="row-actions">${canAccept ? `<button class="mini" data-accept-h2h="${match.id}">Accept</button><button class="mini secondary" data-decline-h2h="${match.id}">Deny</button>` : ""}${canPlay ? `<a class="nav-button primary" href="${playUrl}">Play</a>` : ""}${match.status === "pending" && amChallenger ? `<span class="badge small-badge">Waiting</span>` : ""}</div></div>`;
+    return `<div class="data-row social-row h2h-row ${h2hResultClass(match)}"><div class="data-rank">⚔️</div><div><div class="data-main">vs ${profileLink(other?.id, other?.username)}</div><div class="data-sub">${match.mode || "Everyday"} · ${h2hWinnerText(match)} · You: ${myScore ?? "—"} · Them: ${theirScore ?? "—"}</div></div><div class="row-actions">${canAccept ? `<button class="mini" data-accept-h2h="${match.id}">Accept</button><button class="mini secondary" data-decline-h2h="${match.id}">Deny</button>` : ""}${canPlay ? `<a class="nav-button primary" href="${playUrl}">Play</a>` : ""}${match.status === "pending" && amChallenger ? `<span class="badge small-badge">Waiting</span>` : ""}</div></div>`;
   }).join("");
   list.querySelectorAll("[data-accept-h2h]").forEach(btn => btn.addEventListener("click", () => acceptH2H(btn.dataset.acceptH2h)));
   list.querySelectorAll("[data-decline-h2h]").forEach(btn => btn.addEventListener("click", () => declineH2H(btn.dataset.declineH2h)));
@@ -702,6 +734,7 @@ async function loadProfile() {
   const levelInfo = calculateLevel(totalXp);
   const achievements = getAchievementDefinitions(scores);
   const unlockedCount = achievements.filter(a => a.unlocked).length;
+  const h2hStats = await getH2HStats(loggedInUser.id);
 
   box.innerHTML = `
     <div class="profile-card-inner">
@@ -719,6 +752,7 @@ async function loadProfile() {
         <div><strong>${bestScore}</strong><span>Best</span></div>
         <div><strong>${avgScore}</strong><span>Avg</span></div>
         <div><strong>${unlockedCount}/${achievements.length}</strong><span>Badges</span></div>
+        <div><strong>${h2hStats.wins}-${h2hStats.losses}${h2hStats.ties ? `-${h2hStats.ties}` : ""}</strong><span>H2H</span></div>
       </div>
       <div class="profile-form">
         <label for="profileUsername">Username</label>
