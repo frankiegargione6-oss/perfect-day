@@ -287,6 +287,8 @@ async function saveCompletedGame() {
   }
 
   await saveH2HResult(score, build);
+  await saveGroupResult(score, build);
+  await saveTeamResult(score, build);
 
   lastSavedGameSignature = signature;
   if (mode === "Daily Challenge") {
@@ -310,6 +312,8 @@ function buildLeaderboardRows(rows, selectedMode = "All Modes") {
       bestScore: 0,
       bestTier: "Score",
       bestDate: row.created_at,
+      bestGameId: row.id,
+      bestGameData: row.game_data,
       games: 0,
       totalXp: 0,
       modes: new Set()
@@ -322,6 +326,8 @@ function buildLeaderboardRows(rows, selectedMode = "All Modes") {
       existing.bestScore = row.score || 0;
       existing.bestTier = row.score_tier || "Score";
       existing.bestDate = row.created_at;
+      existing.bestGameId = row.id;
+      existing.bestGameData = row.game_data;
     }
     users.set(userId, existing);
   }
@@ -359,10 +365,15 @@ function renderLeaderboard() {
           <div class="data-main">${profileLink(row.user_id, row.username)} <span class="level-pill">Lv. ${row.levelInfo.level}</span></div>
           <div class="data-sub">${cachedLeaderboardMode} · ${row.bestTier} · ${row.games} game${row.games === 1 ? "" : "s"} · ${row.levelInfo.totalXp} XP</div>
         </div>
-        <div class="data-score">${row.bestScore}/100</div>
+        <div class="row-actions"><div class="data-score">${row.bestScore}/100</div><button class="mini secondary" data-view-game-card="${row.user_id}">View Card</button></div>
       </div>
     `;
   }).join("");
+
+  list.querySelectorAll("[data-view-game-card]").forEach(btn => btn.addEventListener("click", () => {
+    const row = rows.find(r => r.user_id === btn.dataset.viewGameCard);
+    showGameCardModal(row?.username || "Player", row?.bestScore || 0, row?.bestTier || "Completed", row?.mode || cachedLeaderboardMode, row?.bestGameData || {});
+  }));
 
   if (moreBtn) {
     moreBtn.classList.toggle("hidden", rows.length <= 20);
@@ -392,7 +403,7 @@ async function loadLeaderboard() {
   list.innerHTML = "Loading leaderboard...";
   const { data, error } = await supabaseClient
     .from("game_scores")
-    .select("user_id, score, mode, score_tier, created_at, profiles(username)")
+    .select("id, user_id, score, mode, score_tier, created_at, game_data, profiles(username)")
     .eq("completed", true)
     .order("score", { ascending: false })
     .limit(1000);
@@ -663,7 +674,7 @@ async function loadH2HMatches() {
     const canAccept = !amChallenger && match.status === "pending";
     const canPlay = match.status === "accepted" && (myScore === null || myScore === undefined);
     const playUrl = `/?h2h=${match.id}&mode=${encodeURIComponent(match.mode || "Everyday")}`;
-    return `<div class="data-row social-row h2h-row ${h2hResultClass(match)}"><div class="data-rank">⚔️</div><div><div class="data-main">vs ${profileLink(other?.id, other?.username)}</div><div class="data-sub">${match.mode || "Everyday"} · ${h2hWinnerText(match)} · You: ${myScore ?? "—"} · Them: ${theirScore ?? "—"}</div></div><div class="row-actions">${canAccept ? `<button class="mini" data-accept-h2h="${match.id}">Accept</button><button class="mini secondary" data-decline-h2h="${match.id}">Deny</button>` : ""}${canPlay ? `<a class="nav-button primary" href="${playUrl}">Play</a>` : ""}${match.status === "pending" && amChallenger ? `<span class="badge small-badge">Waiting</span>` : ""}</div></div>`;
+    return `<div class="data-row social-row h2h-row ${h2hResultClass(match)}"><div class="data-rank">⚔️</div><div><div class="data-main">vs ${profileLink(other?.id, other?.username)}</div><div class="data-sub">${match.mode || "Everyday"} · ${h2hWinnerText(match)} · You: ${myScore ?? "—"} · Them: ${theirScore ?? "—"}</div></div><div class="row-actions">${canAccept ? `<button class="mini" data-accept-h2h="${match.id}">Accept</button><button class="mini secondary" data-decline-h2h="${match.id}">Deny</button>` : ""}${canPlay ? `<a class="nav-button primary" href="${playUrl}">Play</a>` : ""}<a class="nav-button" href="/match-details.html?h2h=${match.id}">View Match</a>${match.status === "pending" && amChallenger ? `<span class="badge small-badge">Waiting</span>` : ""}</div></div>`;
   }).join("");
   list.querySelectorAll("[data-accept-h2h]").forEach(btn => btn.addEventListener("click", () => acceptH2H(btn.dataset.acceptH2h)));
   list.querySelectorAll("[data-decline-h2h]").forEach(btn => btn.addEventListener("click", () => declineH2H(btn.dataset.declineH2h)));
@@ -672,13 +683,15 @@ async function loadH2HPage() { $("h2hCreateForm")?.addEventListener("submit", cr
 async function setupHeadToHeadGame() {
   if (pageName() !== "game") return;
   const matchId = urlParam("h2h");
-  if (!matchId) return;
+  const groupId = urlParam("group");
+  const teamId = urlParam("team");
+  if (!matchId && !groupId && !teamId) return;
   const mode = urlParam("mode") || "Everyday";
   if ($("mode")) { $("mode").value = mode; $("mode").disabled = true; }
   if (typeof els !== "undefined" && els.modeBadge) els.modeBadge.textContent = mode;
   const heroSub = document.querySelector(".subtitle");
-  if (heroSub) heroSub.textContent = "Head-to-Head match: finish one run and your score will be saved to the match.";
-  if (!loggedInUser) alert("Log in before playing a head-to-head match so your score can save.");
+  if (heroSub) heroSub.textContent = matchId ? "Head-to-Head match: finish one run and your score will be saved to the match." : (groupId ? "Group Play match: finish one run and your score will be saved to the group." : "Team Mode match: finish one run and your score will be saved to your team.");
+  if (!loggedInUser) alert("Log in before playing multiplayer so your score can save.");
 }
 async function saveH2HResult(score, gameData) {
   const matchId = urlParam("h2h");
@@ -696,6 +709,153 @@ async function saveH2HResult(score, gameData) {
   if (finalChallenger !== null && finalChallenger !== undefined && finalOpponent !== null && finalOpponent !== undefined) { update.status = "completed"; update.winner_id = finalChallenger === finalOpponent ? null : (finalChallenger > finalOpponent ? match.challenger_id : match.opponent_id); } else { update.status = "accepted"; }
   const { error: updateError } = await supabaseClient.from("h2h_matches").update(update).eq("id", matchId);
   if (updateError) alert(`Head-to-head score did not save: ${updateError.message}`);
+}
+
+
+function renderSmallGameCard(title, score, tier, mode, gameData) {
+  const picks = Object.entries(gameData || {}).map(([slot, item]) => `
+    <div class="past-pick">
+      <span>${escapeHtml(item?.icon || "🌤️")} ${escapeHtml(slot)}</span>
+      <strong>${escapeHtml(item?.value || "—")}</strong>
+      <em>${escapeHtml(item?.city || "")}</em>
+    </div>
+  `).join("") || `<div class="empty-state">No card saved yet.</div>`;
+  return `<article class="past-game-card match-card"><div class="past-game-top"><div><div class="data-main">${escapeHtml(title)}</div><div class="data-sub">${escapeHtml(mode || "Everyday")} · ${escapeHtml(tier || "Completed")}</div></div><div class="data-score">${score ?? "—"}/100</div></div><div class="past-pick-grid">${picks}</div></article>`;
+}
+
+function showGameCardModal(username, score, tier, mode, gameData) {
+  let overlay = document.getElementById("gameCardModal");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "gameCardModal";
+    overlay.className = "modal-overlay";
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `<div class="modal-content"><div class="modal-top"><div><p class="small">Leaderboard Card</p><h2>${escapeHtml(username)}'s Game</h2></div><button id="closeGameCardModal" class="secondary mini">Close</button></div>${renderSmallGameCard(username, score, tier, mode, gameData)}</div>`;
+  overlay.classList.remove("hidden-modal");
+  document.getElementById("closeGameCardModal")?.addEventListener("click", () => overlay.classList.add("hidden-modal"));
+}
+
+async function loadMatchDetails() {
+  const box = $("matchDetailsContent");
+  if (!box || !supabaseClient) return;
+  const h2hId = urlParam("h2h");
+  if (!h2hId) { box.innerHTML = `<div class="empty-state">No match selected.</div>`; return; }
+  const { data: match, error } = await supabaseClient
+    .from("h2h_matches")
+    .select("*, challenger:profiles!h2h_matches_challenger_id_fkey(id, username), opponent:profiles!h2h_matches_opponent_id_fkey(id, username)")
+    .eq("id", h2hId)
+    .maybeSingle();
+  if (error || !match) { box.textContent = error?.message || "Match not found."; return; }
+  const winner = !match.winner_id ? (match.status === "completed" ? "Tie" : match.status) : (match.winner_id === match.challenger_id ? `${match.challenger?.username} won` : `${match.opponent?.username} won`);
+  box.innerHTML = `<div class="match-summary"><p class="eyebrow">${escapeHtml(match.mode || "Everyday")}</p><h2>${escapeHtml(winner)}</h2><p class="account-subtitle">${escapeHtml(match.challenger?.username || "Player")} ${match.challenger_score ?? "—"} vs ${match.opponent_score ?? "—"} ${escapeHtml(match.opponent?.username || "Player")}</p></div><div class="match-card-grid">${renderSmallGameCard(match.challenger?.username || "Challenger", match.challenger_score, "Head-to-Head", match.mode, match.challenger_game_data)}${renderSmallGameCard(match.opponent?.username || "Opponent", match.opponent_score, "Head-to-Head", match.mode, match.opponent_game_data)}</div>`;
+}
+
+async function renderFriendCheckboxes(containerId, prefix = "player") {
+  const box = $(containerId);
+  if (!box) return [];
+  const rows = await getFriendRows();
+  if (!rows.length) { box.innerHTML = `<div class="empty-state">Add friends first.</div>`; return []; }
+  box.innerHTML = rows.map(row => `<label class="check-card"><input type="checkbox" value="${row.friend_id}" data-${prefix}-friend="true"/> <span>${escapeHtml(row.friend?.username || "Friend")}</span></label>`).join("");
+  return rows;
+}
+
+function checkedValues(containerId) {
+  return [...(document.getElementById(containerId)?.querySelectorAll('input[type="checkbox"]:checked') || [])].map(i => i.value);
+}
+
+async function loadGroupPage() {
+  $("groupCreateForm")?.addEventListener("submit", createGroupMatch);
+  await renderFriendCheckboxes("groupFriendChecks", "group");
+  await loadGroupMatches();
+}
+
+async function createGroupMatch(event) {
+  event?.preventDefault();
+  if (!loggedInUser) return setStatus("Log in first.", "error");
+  const friendIds = checkedValues("groupFriendChecks");
+  if (!friendIds.length) return setStatus("Select at least one friend.", "error");
+  const mode = $("groupModeSelect")?.value || "Everyday";
+  const { data: match, error } = await supabaseClient.from("group_matches").insert({ creator_id: loggedInUser.id, mode, status: "active" }).select().single();
+  if (error) return setStatus(error.message, "error");
+  const players = [loggedInUser.id, ...friendIds].map(user_id => ({ match_id: match.id, user_id }));
+  const { error: playerError } = await supabaseClient.from("group_match_players").insert(players);
+  if (playerError) return setStatus(playerError.message, "error");
+  setStatus("Group match created.", "success");
+  await loadGroupMatches();
+}
+
+async function loadGroupMatches() {
+  const list = $("groupMatchesList");
+  if (!list) return;
+  if (!loggedInUser) { list.innerHTML = `<div class="empty-state">Log in to view group matches.</div>`; return; }
+  const { data, error } = await supabaseClient.from("group_match_players").select("score, game_data, group_matches(id, mode, status, winner_id, created_at)").eq("user_id", loggedInUser.id).order("created_at", { referencedTable: "group_matches", ascending: false }).limit(50);
+  if (error) { list.textContent = error.message; return; }
+  if (!data?.length) { list.innerHTML = `<div class="empty-state">No group matches yet.</div>`; return; }
+  list.innerHTML = data.map(row => { const m=row.group_matches; const canPlay=row.score===null||row.score===undefined; return `<div class="data-row social-row"><div class="data-rank">👥</div><div><div class="data-main">${escapeHtml(m.mode || "Everyday")} Group Match</div><div class="data-sub">${escapeHtml(m.status || "active")} · Your score: ${row.score ?? "—"}</div></div><div class="row-actions">${canPlay ? `<a class="nav-button primary" href="/?group=${m.id}&mode=${encodeURIComponent(m.mode || "Everyday")}">Play</a>` : ""}<a class="nav-button" href="/match-details.html?group=${m.id}">View Match</a></div></div>`; }).join("");
+}
+
+async function saveGroupResult(score, gameData) {
+  const matchId = urlParam("group");
+  if (!matchId || !loggedInUser || !supabaseClient) return;
+  const { error } = await supabaseClient.from("group_match_players").update({ score: score.total, game_data: gameData, finished_at: new Date().toISOString() }).eq("match_id", matchId).eq("user_id", loggedInUser.id);
+  if (error) return alert(`Group score did not save: ${error.message}`);
+  const { data: players } = await supabaseClient.from("group_match_players").select("user_id, score").eq("match_id", matchId);
+  const finished = (players || []).filter(p => p.score !== null && p.score !== undefined);
+  if (players?.length && finished.length === players.length) {
+    const best = [...finished].sort((a,b)=>(b.score||0)-(a.score||0))[0];
+    await supabaseClient.from("group_matches").update({ status: "completed", winner_id: best.user_id, updated_at: new Date().toISOString() }).eq("id", matchId);
+  }
+}
+
+async function loadTeamPage() {
+  $("teamCreateForm")?.addEventListener("submit", createTeamMatch);
+  await renderFriendCheckboxes("teamAFriendChecks", "team-a");
+  await renderFriendCheckboxes("teamBFriendChecks", "team-b");
+  await loadTeamMatches();
+}
+
+async function createTeamMatch(event) {
+  event?.preventDefault();
+  if (!loggedInUser) return setStatus("Log in first.", "error");
+  const teamA = Array.from(new Set([loggedInUser.id, ...checkedValues("teamAFriendChecks")]));
+  const teamB = checkedValues("teamBFriendChecks");
+  if (!teamB.length) return setStatus("Select at least one player for Team B.", "error");
+  if (teamB.some(id => teamA.includes(id))) return setStatus("A player cannot be on both teams.", "error");
+  const mode = $("teamModeSelect")?.value || "Everyday";
+  const { data: match, error } = await supabaseClient.from("team_matches").insert({ creator_id: loggedInUser.id, mode, status: "active" }).select().single();
+  if (error) return setStatus(error.message, "error");
+  const players = [...teamA.map(user_id => ({ match_id: match.id, user_id, team_name: "A" })), ...teamB.map(user_id => ({ match_id: match.id, user_id, team_name: "B" }))];
+  const { error: playerError } = await supabaseClient.from("team_match_players").insert(players);
+  if (playerError) return setStatus(playerError.message, "error");
+  setStatus("Team match created.", "success");
+  await loadTeamMatches();
+}
+
+async function loadTeamMatches() {
+  const list = $("teamMatchesList");
+  if (!list) return;
+  if (!loggedInUser) { list.innerHTML = `<div class="empty-state">Log in to view team matches.</div>`; return; }
+  const { data, error } = await supabaseClient.from("team_match_players").select("score, team_name, team_matches(id, mode, status, winning_team, created_at)").eq("user_id", loggedInUser.id).order("created_at", { referencedTable: "team_matches", ascending: false }).limit(50);
+  if (error) { list.textContent = error.message; return; }
+  if (!data?.length) { list.innerHTML = `<div class="empty-state">No team matches yet.</div>`; return; }
+  list.innerHTML = data.map(row => { const m=row.team_matches; const canPlay=row.score===null||row.score===undefined; return `<div class="data-row social-row"><div class="data-rank">🛡️</div><div><div class="data-main">Team ${escapeHtml(row.team_name)} · ${escapeHtml(m.mode || "Everyday")}</div><div class="data-sub">${escapeHtml(m.status || "active")} · winner: ${escapeHtml(m.winning_team || "—")} · Your score: ${row.score ?? "—"}</div></div><div class="row-actions">${canPlay ? `<a class="nav-button primary" href="/?team=${m.id}&mode=${encodeURIComponent(m.mode || "Everyday")}">Play</a>` : ""}<a class="nav-button" href="/match-details.html?team=${m.id}">View Match</a></div></div>`; }).join("");
+}
+
+async function saveTeamResult(score, gameData) {
+  const matchId = urlParam("team");
+  if (!matchId || !loggedInUser || !supabaseClient) return;
+  const { error } = await supabaseClient.from("team_match_players").update({ score: score.total, game_data: gameData, finished_at: new Date().toISOString() }).eq("match_id", matchId).eq("user_id", loggedInUser.id);
+  if (error) return alert(`Team score did not save: ${error.message}`);
+  const { data: players } = await supabaseClient.from("team_match_players").select("team_name, score").eq("match_id", matchId);
+  const finished = (players || []).filter(p => p.score !== null && p.score !== undefined);
+  if (players?.length && finished.length === players.length) {
+    const teamA = finished.filter(p => p.team_name === "A");
+    const teamB = finished.filter(p => p.team_name === "B");
+    const avg = arr => arr.length ? arr.reduce((s,p)=>s+(p.score||0),0)/arr.length : 0;
+    const a = avg(teamA), b = avg(teamB);
+    await supabaseClient.from("team_matches").update({ status: "completed", team_a_score: Math.round(a), team_b_score: Math.round(b), winning_team: a === b ? "Tie" : (a > b ? "A" : "B"), updated_at: new Date().toISOString() }).eq("id", matchId);
+  }
 }
 
 
@@ -963,6 +1123,9 @@ async function routePageLoad() {
   if (page === "friends") await loadFriendsPage();
   if (page === "public-profile") await loadPublicProfile();
   if (page === "head-to-head") await loadH2HPage();
+  if (page === "group-play") await loadGroupPage();
+  if (page === "team-mode") await loadTeamPage();
+  if (page === "match-details") await loadMatchDetails();
   if (page === "game") await setupHeadToHeadGame();
 }
 

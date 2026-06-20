@@ -1134,3 +1134,39 @@ button.mini {
   .site-header { align-items: flex-start; }
   .back-home { order: -2; }
 }
+
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+.check-card {
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-weight: 900;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.check-card input { transform: scale(1.1); }
+.team-builder {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.match-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.match-summary {
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.match-card { margin: 0; }
+@media (max-width: 720px) { .team-builder { grid-template-columns: 1fr; } }
