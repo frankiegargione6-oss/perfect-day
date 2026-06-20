@@ -2295,3 +2295,37 @@ renderBoard();
 updateRoundText();
 hydrateBuildFromHash();
 
+
+
+// v0.28 PWA install banner
+(function setupInstallBanner(){
+  const card = document.getElementById("installAppCard");
+  const installBtn = document.getElementById("installAppBtn");
+  const dismissBtn = document.getElementById("dismissInstallBtn");
+  if (!card || !installBtn || !dismissBtn) return;
+
+  const dismissed = localStorage.getItem("perfectday_install_dismissed") === "true";
+  const alreadyInstalled = window.PerfectDayPWA && window.PerfectDayPWA.isStandalone && window.PerfectDayPWA.isStandalone();
+
+  function showIfReady(){
+    if (dismissed || alreadyInstalled) return;
+    if (window.PerfectDayPWA && window.PerfectDayPWA.canInstall && window.PerfectDayPWA.canInstall()) {
+      card.classList.remove("hidden");
+    }
+  }
+
+  document.addEventListener("perfectday-install-ready", showIfReady);
+  setTimeout(showIfReady, 500);
+
+  installBtn.addEventListener("click", async () => {
+    if (window.PerfectDayPWA && window.PerfectDayPWA.install) {
+      const accepted = await window.PerfectDayPWA.install();
+      if (accepted) card.classList.add("hidden");
+    }
+  });
+
+  dismissBtn.addEventListener("click", () => {
+    localStorage.setItem("perfectday_install_dismissed", "true");
+    card.classList.add("hidden");
+  });
+})();

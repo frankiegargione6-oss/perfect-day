@@ -119,3 +119,10 @@ Do not double-click `index.html`; the local server has to be running.
 - Adds a 100/100 games stat to profiles.
 - Moves Group Play and Team Mode into the Head-to-Head page to reduce nav clutter.
 - Requires running `supabase_season_update.sql` before deploying.
+
+
+## v0.28 changes
+
+- Added PWA install support.
+- Added manifest, app icons, service worker, and mobile home-screen install behavior.
+- No Supabase SQL required.

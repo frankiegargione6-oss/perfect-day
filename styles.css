@@ -1426,3 +1426,30 @@ button.mini {
 }
 [data-theme="dark"] .streak-cell { background: rgba(255,255,255,.09); }
 [data-theme="dark"] .streak-cell.done { background: #1f9f63; }
+
+
+/* v0.28 PWA install polish */
+.install-app-card {
+  width: min(900px, 100%);
+  margin: 0 auto 22px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: rgba(255,255,255,.9);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.install-app-card.hidden { display: none; }
+.install-app-card h2 { margin: 0 0 6px; }
+.install-app-card p:not(.small) { margin: 0; color: var(--muted); font-weight: 750; }
+.install-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+body.dark .install-app-card,
+.dark .install-app-card { background: rgba(22, 29, 43, .92); }
+@media (max-width: 720px) {
+  .install-app-card { flex-direction: column; align-items: flex-start; }
+  .install-actions { width: 100%; }
+  .install-actions button { flex: 1; min-width: 120px; }
+}
