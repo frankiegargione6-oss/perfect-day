@@ -102,3 +102,11 @@ Do not double-click `index.html`; the local server has to be running.
 - Added dark mode toggle saved locally.
 - Added Achievements page.
 - Final missing-variable auto-reroll now triggers whenever the final slot is missing.
+
+
+## v0.24 changes
+
+- Expanded to 142 city/METAR locations.
+- Added new weighted scoring formulas for Everyday, Summer, Winter, Beach, Golf, Tailgate, Severe Weather, and Worst Day.
+- Updated all mode dropdowns to the new mode list.
+- No new Supabase SQL required.

@@ -4,7 +4,7 @@ const cityData = {
       "name": "Boston, MA",
       "abbr": "BOS",
       "station": "KBOS",
-      "type": "City"
+      "type": "Coastal City"
     },
     {
       "name": "Portland, ME",
@@ -16,61 +16,97 @@ const cityData = {
       "name": "Burlington, VT",
       "abbr": "BTV",
       "station": "KBTV",
-      "type": "Mountain/Lake"
+      "type": "Lake/Mountain"
     },
     {
       "name": "Albany, NY",
       "abbr": "ALB",
       "station": "KALB",
-      "type": "City"
+      "type": "Inland City"
     },
     {
       "name": "Providence, RI",
       "abbr": "PVD",
       "station": "KPVD",
-      "type": "Coastal"
+      "type": "Coastal City"
     },
     {
       "name": "Hartford, CT",
       "abbr": "BDL",
       "station": "KBDL",
-      "type": "City"
+      "type": "Inland City"
     },
     {
       "name": "Manchester, NH",
       "abbr": "MHT",
       "station": "KMHT",
-      "type": "City"
-    },
-    {
-      "name": "Bangor, ME",
-      "abbr": "BGR",
-      "station": "KBGR",
-      "type": "Forest"
+      "type": "Inland City"
     },
     {
       "name": "Syracuse, NY",
       "abbr": "SYR",
       "station": "KSYR",
-      "type": "City"
+      "type": "Inland City"
     },
     {
       "name": "Rochester, NY",
       "abbr": "ROC",
       "station": "KROC",
-      "type": "Lake"
+      "type": "Lake City"
     },
     {
-      "name": "Worcester, MA",
-      "abbr": "ORH",
-      "station": "KORH",
-      "type": "City"
+      "name": "Scranton, PA",
+      "abbr": "AVP",
+      "station": "KAVP",
+      "type": "Valley"
     },
     {
-      "name": "New York, NY",
+      "name": "Bangor, ME",
+      "abbr": "BGR",
+      "station": "KBGR",
+      "type": "Northern"
+    },
+    {
+      "name": "New York City, NY",
       "abbr": "NYC",
       "station": "KNYC",
       "type": "Big City"
+    },
+    {
+      "name": "Pittsburgh, PA",
+      "abbr": "PIT",
+      "station": "KPIT",
+      "type": "City"
+    },
+    {
+      "name": "Lake Placid, NY",
+      "abbr": "LKP",
+      "station": "KLKP",
+      "type": "Mountain/Lake"
+    },
+    {
+      "name": "Ithaca, NY",
+      "abbr": "ITH",
+      "station": "KITH",
+      "type": "College Town"
+    },
+    {
+      "name": "Newport, RI",
+      "abbr": "UUU",
+      "station": "KUUU",
+      "type": "Coastal"
+    },
+    {
+      "name": "Bar Harbor, ME",
+      "abbr": "BHB",
+      "station": "KBHB",
+      "type": "Coastal"
+    },
+    {
+      "name": "Montpelier, VT",
+      "abbr": "MPV",
+      "station": "KMPV",
+      "type": "Mountain"
     }
   ],
   "Mid-Atlantic": [
@@ -78,25 +114,25 @@ const cityData = {
       "name": "Philadelphia, PA",
       "abbr": "PHL",
       "station": "KPHL",
-      "type": "City"
+      "type": "Big City"
     },
     {
       "name": "Baltimore, MD",
       "abbr": "BAL",
       "station": "KBWI",
-      "type": "City"
+      "type": "Coastal City"
     },
     {
       "name": "Washington, DC",
       "abbr": "DC",
       "station": "KDCA",
-      "type": "City"
+      "type": "Big City"
     },
     {
       "name": "Richmond, VA",
       "abbr": "RIC",
       "station": "KRIC",
-      "type": "City"
+      "type": "Inland City"
     },
     {
       "name": "Norfolk, VA",
@@ -111,28 +147,64 @@ const cityData = {
       "type": "Beach"
     },
     {
-      "name": "Harrisburg, PA",
-      "abbr": "MDT",
-      "station": "KMDT",
-      "type": "River Valley"
+      "name": "Cape May, NJ",
+      "abbr": "CMY",
+      "station": "KWWD",
+      "type": "Beach"
     },
     {
       "name": "Allentown, PA",
       "abbr": "ABE",
       "station": "KABE",
-      "type": "City"
+      "type": "Inland City"
     },
     {
-      "name": "Wilmington, DE",
-      "abbr": "ILG",
-      "station": "KILG",
-      "type": "City"
+      "name": "Harrisburg, PA",
+      "abbr": "HAR",
+      "station": "KMDT",
+      "type": "River City"
     },
     {
       "name": "State College, PA",
       "abbr": "UNV",
       "station": "KUNV",
       "type": "College Town"
+    },
+    {
+      "name": "Ocean City, MD",
+      "abbr": "OXB",
+      "station": "KOXB",
+      "type": "Beach"
+    },
+    {
+      "name": "Dover, DE",
+      "abbr": "DOV",
+      "station": "KDOV",
+      "type": "City"
+    },
+    {
+      "name": "Morgantown, WV",
+      "abbr": "MGW",
+      "station": "KMGW",
+      "type": "Mountain/College"
+    },
+    {
+      "name": "Roanoke, VA",
+      "abbr": "ROA",
+      "station": "KROA",
+      "type": "Valley"
+    },
+    {
+      "name": "Virginia Beach, VA",
+      "abbr": "NTU",
+      "station": "KNTU",
+      "type": "Beach"
+    },
+    {
+      "name": "Lancaster, PA",
+      "abbr": "LNS",
+      "station": "KLNS",
+      "type": "City"
     }
   ],
   "Southeast": [
@@ -140,7 +212,7 @@ const cityData = {
       "name": "Miami, FL",
       "abbr": "MIA",
       "station": "KMIA",
-      "type": "Beach"
+      "type": "Tropical"
     },
     {
       "name": "Tampa, FL",
@@ -152,7 +224,7 @@ const cityData = {
       "name": "Orlando, FL",
       "abbr": "ORL",
       "station": "KMCO",
-      "type": "City"
+      "type": "Inland City"
     },
     {
       "name": "Jacksonville, FL",
@@ -182,105 +254,177 @@ const cityData = {
       "name": "Atlanta, GA",
       "abbr": "ATL",
       "station": "KATL",
-      "type": "City"
+      "type": "Big City"
     },
     {
       "name": "Nashville, TN",
       "abbr": "BNA",
       "station": "KBNA",
-      "type": "City"
+      "type": "Inland City"
     },
     {
       "name": "New Orleans, LA",
-      "abbr": "MSY",
+      "abbr": "NOLA",
       "station": "KMSY",
-      "type": "Coastal"
+      "type": "Gulf Coast"
     },
     {
-      "name": "Charlotte, NC",
-      "abbr": "CLT",
-      "station": "KCLT",
-      "type": "City"
+      "name": "Birmingham, AL",
+      "abbr": "BHM",
+      "station": "KBHM",
+      "type": "Inland City"
     },
     {
       "name": "Raleigh, NC",
       "abbr": "RDU",
       "station": "KRDU",
-      "type": "City"
+      "type": "Inland City"
+    },
+    {
+      "name": "Key West, FL",
+      "abbr": "EYW",
+      "station": "KEYW",
+      "type": "Island/Beach"
+    },
+    {
+      "name": "Pensacola, FL",
+      "abbr": "PNS",
+      "station": "KPNS",
+      "type": "Coastal"
+    },
+    {
+      "name": "Myrtle Beach, SC",
+      "abbr": "MYR",
+      "station": "KMYR",
+      "type": "Beach"
+    },
+    {
+      "name": "Gatlinburg, TN",
+      "abbr": "GKT",
+      "station": "KGKT",
+      "type": "Mountain/Tourist"
+    },
+    {
+      "name": "Destin, FL",
+      "abbr": "DTS",
+      "station": "KDTS",
+      "type": "Beach"
+    },
+    {
+      "name": "Wilmington, NC",
+      "abbr": "ILM",
+      "station": "KILM",
+      "type": "Coastal"
     }
   ],
   "Great Lakes": [
     {
       "name": "Chicago, IL",
       "abbr": "CHI",
-      "station": "KMDW",
-      "type": "Lake/City"
+      "station": "KORD",
+      "type": "Lake City"
     },
     {
       "name": "Detroit, MI",
       "abbr": "DET",
       "station": "KDTW",
-      "type": "City"
+      "type": "Lake City"
     },
     {
       "name": "Cleveland, OH",
       "abbr": "CLE",
       "station": "KCLE",
-      "type": "Lake/City"
+      "type": "Lake City"
     },
     {
       "name": "Indianapolis, IN",
       "abbr": "IND",
       "station": "KIND",
-      "type": "City"
+      "type": "Inland City"
     },
     {
       "name": "Milwaukee, WI",
       "abbr": "MKE",
       "station": "KMKE",
-      "type": "Lake/City"
+      "type": "Lake City"
     },
     {
       "name": "Green Bay, WI",
-      "abbr": "GRB",
+      "abbr": "GB",
       "station": "KGRB",
-      "type": "Lake"
+      "type": "Lake City"
     },
     {
       "name": "Buffalo, NY",
       "abbr": "BUF",
       "station": "KBUF",
-      "type": "Lake"
+      "type": "Lake City"
     },
     {
       "name": "Erie, PA",
       "abbr": "ERI",
       "station": "KERI",
-      "type": "Lake"
+      "type": "Lake City"
     },
     {
       "name": "Toledo, OH",
       "abbr": "TOL",
       "station": "KTOL",
-      "type": "City"
+      "type": "Lake City"
     },
     {
       "name": "Grand Rapids, MI",
       "abbr": "GRR",
       "station": "KGRR",
-      "type": "City"
-    },
-    {
-      "name": "Madison, WI",
-      "abbr": "MSN",
-      "station": "KMSN",
-      "type": "Lake/College"
+      "type": "Lake City"
     },
     {
       "name": "Traverse City, MI",
       "abbr": "TVC",
       "station": "KTVC",
+      "type": "Lake City"
+    },
+    {
+      "name": "South Bend, IN",
+      "abbr": "SBN",
+      "station": "KSBN",
+      "type": "Lake City"
+    },
+    {
+      "name": "Mackinac Island, MI",
+      "abbr": "MCD",
+      "station": "KMCD",
+      "type": "Island/Lake"
+    },
+    {
+      "name": "Marquette, MI",
+      "abbr": "MQT",
+      "station": "KSAW",
+      "type": "Lake/Snowbelt"
+    },
+    {
+      "name": "Sault Ste. Marie, MI",
+      "abbr": "CIU",
+      "station": "KCIU",
+      "type": "Northern/Lake"
+    },
+    {
+      "name": "Duluth, MN",
+      "abbr": "DLH",
+      "station": "KDLH",
       "type": "Lake"
+    },
+    {
+      "name": "Kalamazoo, MI",
+      "abbr": "AZO",
+      "station": "KAZO",
+      "type": "City"
+    },
+    {
+      "name": "Flint, MI",
+      "abbr": "FNT",
+      "station": "KFNT",
+      "type": "City"
     }
   ],
   "Great Plains": [
@@ -288,25 +432,25 @@ const cityData = {
       "name": "Kansas City, MO",
       "abbr": "KC",
       "station": "KMCI",
-      "type": "City"
+      "type": "Plains City"
     },
     {
       "name": "Oklahoma City, OK",
       "abbr": "OKC",
       "station": "KOKC",
-      "type": "Plains"
+      "type": "Plains City"
     },
     {
       "name": "Wichita, KS",
       "abbr": "ICT",
       "station": "KICT",
-      "type": "Plains"
+      "type": "Plains City"
     },
     {
       "name": "Omaha, NE",
       "abbr": "OMA",
       "station": "KOMA",
-      "type": "Plains"
+      "type": "Plains City"
     },
     {
       "name": "Amarillo, TX",
@@ -342,19 +486,55 @@ const cityData = {
       "name": "North Platte, NE",
       "abbr": "LBF",
       "station": "KLBF",
-      "type": "Plains"
+      "type": "High Plains"
     },
     {
       "name": "Sioux Falls, SD",
       "abbr": "FSD",
       "station": "KFSD",
+      "type": "Northern Plains"
+    },
+    {
+      "name": "Des Moines, IA",
+      "abbr": "DSM",
+      "station": "KDSM",
+      "type": "Plains City"
+    },
+    {
+      "name": "Hays, KS",
+      "abbr": "HYS",
+      "station": "KHYS",
       "type": "Plains"
     },
     {
-      "name": "Tulsa, OK",
-      "abbr": "TUL",
-      "station": "KTUL",
+      "name": "Garden City, KS",
+      "abbr": "GCK",
+      "station": "KGCK",
+      "type": "High Plains"
+    },
+    {
+      "name": "Enid, OK",
+      "abbr": "WDG",
+      "station": "KWDG",
       "type": "Plains"
+    },
+    {
+      "name": "Bismarck, ND",
+      "abbr": "BIS",
+      "station": "KBIS",
+      "type": "Northern Plains"
+    },
+    {
+      "name": "Pierre, SD",
+      "abbr": "PIR",
+      "station": "KPIR",
+      "type": "Plains"
+    },
+    {
+      "name": "Lincoln, NE",
+      "abbr": "LNK",
+      "station": "KLNK",
+      "type": "City"
     }
   ],
   "Rockies": [
@@ -368,11 +548,11 @@ const cityData = {
       "name": "Colorado Springs, CO",
       "abbr": "COS",
       "station": "KCOS",
-      "type": "Mountain"
+      "type": "Mountain/City"
     },
     {
       "name": "Aspen, CO",
-      "abbr": "ASE",
+      "abbr": "ASP",
       "station": "KASE",
       "type": "Mountain"
     },
@@ -407,28 +587,64 @@ const cityData = {
       "type": "Mountain/City"
     },
     {
-      "name": "Cheyenne, WY",
-      "abbr": "CYS",
-      "station": "KCYS",
-      "type": "High Plains"
-    },
-    {
       "name": "Billings, MT",
       "abbr": "BIL",
       "station": "KBIL",
       "type": "Mountain/Plains"
     },
     {
-      "name": "Flagstaff, AZ",
-      "abbr": "FLG",
-      "station": "KFLG",
+      "name": "Cheyenne, WY",
+      "abbr": "CYS",
+      "station": "KCYS",
+      "type": "High Plains"
+    },
+    {
+      "name": "Idaho Falls, ID",
+      "abbr": "IDA",
+      "station": "KIDA",
       "type": "Mountain"
     },
     {
       "name": "Reno, NV",
       "abbr": "RNO",
       "station": "KRNO",
-      "type": "Mountain/Desert"
+      "type": "High Desert"
+    },
+    {
+      "name": "Laramie, WY",
+      "abbr": "LAR",
+      "station": "KLAR",
+      "type": "High Plains/Mountain"
+    },
+    {
+      "name": "Cody, WY",
+      "abbr": "COD",
+      "station": "KCOD",
+      "type": "Mountain"
+    },
+    {
+      "name": "Casper, WY",
+      "abbr": "CPR",
+      "station": "KCPR",
+      "type": "High Plains"
+    },
+    {
+      "name": "Telluride, CO",
+      "abbr": "TEX",
+      "station": "KTEX",
+      "type": "Mountain"
+    },
+    {
+      "name": "Steamboat Springs, CO",
+      "abbr": "SBS",
+      "station": "KSBS",
+      "type": "Mountain"
+    },
+    {
+      "name": "West Yellowstone, MT",
+      "abbr": "WYS",
+      "station": "KWYS",
+      "type": "Mountain/Park"
     }
   ],
   "Southwest": [
@@ -445,20 +661,32 @@ const cityData = {
       "type": "Desert"
     },
     {
+      "name": "Flagstaff, AZ",
+      "abbr": "FLG",
+      "station": "KFLG",
+      "type": "High Desert"
+    },
+    {
+      "name": "Sedona, AZ",
+      "abbr": "SDX",
+      "station": "KSEZ",
+      "type": "Desert"
+    },
+    {
       "name": "Santa Fe, NM",
       "abbr": "SAF",
       "station": "KSAF",
-      "type": "Desert/Mountain"
+      "type": "High Desert"
     },
     {
       "name": "Albuquerque, NM",
       "abbr": "ABQ",
       "station": "KABQ",
-      "type": "Desert"
+      "type": "High Desert"
     },
     {
       "name": "Las Vegas, NV",
-      "abbr": "LAS",
+      "abbr": "LV",
       "station": "KLAS",
       "type": "Desert"
     },
@@ -475,34 +703,58 @@ const cityData = {
       "type": "Desert"
     },
     {
-      "name": "Sedona, AZ",
-      "abbr": "SDX",
-      "station": "KSEZ",
-      "type": "Desert"
-    },
-    {
       "name": "Yuma, AZ",
       "abbr": "YUM",
       "station": "KYUM",
       "type": "Desert"
     },
     {
-      "name": "Roswell, NM",
-      "abbr": "ROW",
-      "station": "KROW",
+      "name": "San Antonio, TX",
+      "abbr": "SA",
+      "station": "KSAT",
+      "type": "South Texas"
+    },
+    {
+      "name": "Austin, TX",
+      "abbr": "AUS",
+      "station": "KAUS",
+      "type": "Hill Country"
+    },
+    {
+      "name": "Death Valley, CA",
+      "abbr": "DRA",
+      "station": "KDRA",
       "type": "Desert"
     },
     {
-      "name": "Midland, TX",
-      "abbr": "MAF",
-      "station": "KMAF",
+      "name": "Page, AZ",
+      "abbr": "PGA",
+      "station": "KPGA",
+      "type": "Desert/Lake"
+    },
+    {
+      "name": "Moab, UT",
+      "abbr": "CNY",
+      "station": "KCNY",
+      "type": "Desert"
+    },
+    {
+      "name": "Marfa, TX",
+      "abbr": "MRF",
+      "station": "KMRF",
+      "type": "Desert/High Plains"
+    },
+    {
+      "name": "Hobbs, NM",
+      "abbr": "HOB",
+      "station": "KHOB",
       "type": "Desert/Plains"
     },
     {
-      "name": "San Angelo, TX",
-      "abbr": "SJT",
-      "station": "KSJT",
-      "type": "Desert/Plains"
+      "name": "Carlsbad, NM",
+      "abbr": "CNM",
+      "station": "KCNM",
+      "type": "Desert"
     }
   ],
   "West Coast": [
@@ -516,7 +768,7 @@ const cityData = {
       "name": "Los Angeles, CA",
       "abbr": "LA",
       "station": "KLAX",
-      "type": "Coastal/City"
+      "type": "Coastal City"
     },
     {
       "name": "Santa Barbara, CA",
@@ -534,13 +786,19 @@ const cityData = {
       "name": "San Francisco, CA",
       "abbr": "SF",
       "station": "KSFO",
-      "type": "Coastal/City"
+      "type": "Bay/Coastal"
     },
     {
       "name": "Eureka, CA",
       "abbr": "EKA",
-      "station": "KEKA",
+      "station": "KACV",
       "type": "Coastal"
+    },
+    {
+      "name": "Sacramento, CA",
+      "abbr": "SAC",
+      "station": "KSMF",
+      "type": "Valley"
     },
     {
       "name": "Portland, OR",
@@ -552,13 +810,19 @@ const cityData = {
       "name": "Seattle, WA",
       "abbr": "SEA",
       "station": "KSEA",
-      "type": "City"
+      "type": "Coastal City"
     },
     {
       "name": "Spokane, WA",
       "abbr": "GEG",
       "station": "KGEG",
-      "type": "Inland"
+      "type": "Inland Northwest"
+    },
+    {
+      "name": "Bend, OR",
+      "abbr": "BND",
+      "station": "KBDN",
+      "type": "High Desert"
     },
     {
       "name": "Medford, OR",
@@ -567,16 +831,40 @@ const cityData = {
       "type": "Valley"
     },
     {
-      "name": "Sacramento, CA",
-      "abbr": "SAC",
-      "station": "KSAC",
-      "type": "Valley"
+      "name": "Lake Tahoe, CA",
+      "abbr": "TVL",
+      "station": "KTVL",
+      "type": "Mountain/Lake"
     },
     {
-      "name": "Fresno, CA",
-      "abbr": "FAT",
-      "station": "KFAT",
-      "type": "Valley"
+      "name": "Crescent City, CA",
+      "abbr": "CEC",
+      "station": "KCEC",
+      "type": "Coastal"
+    },
+    {
+      "name": "Newport, OR",
+      "abbr": "ONP",
+      "station": "KONP",
+      "type": "Coastal"
+    },
+    {
+      "name": "Astoria, OR",
+      "abbr": "AST",
+      "station": "KAST",
+      "type": "Coastal"
+    },
+    {
+      "name": "Bellingham, WA",
+      "abbr": "BLI",
+      "station": "KBLI",
+      "type": "Coastal"
+    },
+    {
+      "name": "Port Angeles, WA",
+      "abbr": "CLM",
+      "station": "KCLM",
+      "type": "Coastal"
     }
   ]
 };
@@ -1150,82 +1438,203 @@ function scoreRange(value, bands, fallback = 0) {
   return fallback;
 }
 
-function scoreSky(value) {
-  const text = String(value || "").toLowerCase();
-  if (text.includes("thunder") || text.includes("rain") || text.includes("snow") || text.includes("fog") || text.includes("mist") || text.includes("haze")) return 0;
-  if (text.includes("clear") || text.includes("sunny")) return 15;
-  if (text.includes("few")) return 14;
-  if (text.includes("mostly sunny")) return 13;
-  if (text.includes("partly")) return 11;
-  if (text.includes("mostly cloudy") || text.includes("broken")) return 7;
-  if (text.includes("overcast")) return 2;
-  return 8;
+function scoreTargetRange(value, min, max, weight, tolerance) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return 0;
+  const v = Number(value);
+  if (v >= min && v <= max) return weight;
+  const dist = v < min ? min - v : v - max;
+  return Math.max(0, Math.round(weight * (1 - (dist / tolerance))));
 }
 
-function scoreVisibility(value) {
+function scoreAtLeast(value, min, weight) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return 0;
+  const v = Number(value);
+  if (v >= min) return weight;
+  return Math.max(0, Math.round(weight * (v / min)));
+}
+
+function scoreClearSky(value, weight) {
   const text = String(value || "").toLowerCase();
-  const vis = numericValue(text);
-  if (text.includes("+") || vis >= 10) return 15;
-  return scoreRange(vis, [
-    { min: 8, max: 9.99, points: 13 },
-    { min: 6, max: 7.99, points: 10 },
-    { min: 4, max: 5.99, points: 6 },
-    { min: 2, max: 3.99, points: 3 },
-    { min: 0, max: 1.99, points: 0 }
-  ]);
+  if (text.includes("thunder") || text.includes("rain") || text.includes("snow") || text.includes("fog") || text.includes("mist") || text.includes("haze")) return 0;
+  if (text.includes("clear") || text.includes("sunny") || text.includes("few")) return weight;
+  if (text.includes("partly") || text.includes("scattered")) return Math.round(weight * 0.72);
+  if (text.includes("mostly cloudy") || text.includes("broken")) return Math.round(weight * 0.35);
+  if (text.includes("overcast")) return Math.round(weight * 0.12);
+  return Math.round(weight * 0.55);
+}
+
+function scoreCloudySky(value, weight) {
+  const text = String(value || "").toLowerCase();
+  if (text.includes("thunder") || text.includes("rain") || text.includes("shower")) return weight;
+  if (text.includes("overcast") || text.includes("mostly cloudy") || text.includes("broken") || text.includes("cloudy")) return weight;
+  if (text.includes("partly") || text.includes("scattered")) return Math.round(weight * 0.65);
+  if (text.includes("few") || text.includes("mostly sunny")) return Math.round(weight * 0.30);
+  if (text.includes("clear") || text.includes("sunny")) return Math.round(weight * 0.12);
+  return Math.round(weight * 0.55);
+}
+
+function scoreWorstSky(value, weight) {
+  const text = String(value || "").toLowerCase();
+  if (text.includes("thunder") || text.includes("rain") || text.includes("snow") || text.includes("fog") || text.includes("mist") || text.includes("haze")) return weight;
+  if (text.includes("overcast") || text.includes("mostly cloudy") || text.includes("broken")) return Math.round(weight * 0.90);
+  if (text.includes("partly") || text.includes("scattered")) return Math.round(weight * 0.45);
+  if (text.includes("few") || text.includes("mostly sunny")) return Math.round(weight * 0.15);
+  if (text.includes("clear") || text.includes("sunny")) return 0;
+  return Math.round(weight * 0.45);
+}
+
+function scoreVisibilityClear(value, weight) {
+  const vis = numericValue(value);
+  return scoreAtLeast(vis, 10, weight);
+}
+
+function scoreWorstVisibility(value, weight) {
+  const vis = numericValue(value);
+  if (vis === null || vis === undefined || Number.isNaN(Number(vis))) return 0;
+  if (vis <= 1) return weight;
+  if (vis >= 10) return 0;
+  return Math.round(weight * (1 - ((vis - 1) / 9)));
+}
+
+function scoreWorstTemp(value, weight) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return 0;
+  const dist = Math.abs(Number(value) - 70);
+  if (dist >= 35) return weight;
+  if (dist <= 5) return 0;
+  return Math.round(weight * ((dist - 5) / 30));
+}
+
+function scoreWorstDew(value, weight) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return 0;
+  const v = Number(value);
+  const humid = v >= 75 ? 1 : v <= 60 ? 0 : (v - 60) / 15;
+  const dry = v <= 10 ? 1 : v >= 35 ? 0 : (35 - v) / 25;
+  return Math.round(weight * Math.max(humid, dry));
+}
+
+function scoreWorstWind(value, weight) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return 0;
+  const v = Number(value);
+  if (v >= 35) return weight;
+  if (v <= 8) return 0;
+  return Math.round(weight * ((v - 8) / 27));
+}
+
+function scoreWorstPressure(value, weight) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return 0;
+  const v = Number(value);
+  const low = v <= 990 ? 1 : v >= 1010 ? 0 : (1010 - v) / 20;
+  const high = v >= 1032 ? 1 : v <= 1020 ? 0 : (v - 1020) / 12;
+  return Math.round(weight * Math.max(low, high));
+}
+
+const scoringConfigs = {
+  "Everyday": {
+    tierLabel: "Everyday Score",
+    sky: "clear",
+    weights: { temp: 30, dew: 25, wind: 15, sky: 15, visibility: 10, pressure: 5 },
+    targets: { temp: [70,72,15], dew: [54,56,15], wind: [5,8,15], pressure: [1012,1014,18] }
+  },
+  "Summer": {
+    tierLabel: "Summer Score",
+    sky: "clear",
+    weights: { temp: 40, dew: 15, wind: 15, sky: 20, visibility: 5, pressure: 5 },
+    targets: { temp: [87,93,16], dew: [56,62,16], wind: [0,5,14], pressure: [1018,1021,18] }
+  },
+  "Winter": {
+    tierLabel: "Winter Score",
+    sky: "clear",
+    weights: { temp: 35, dew: 10, wind: 25, sky: 15, visibility: 10, pressure: 5 },
+    targets: { temp: [30,35,18], dew: [20,22,18], wind: [4,8,16], pressure: [1012,1014,18] }
+  },
+  "Beach": {
+    tierLabel: "Beach Score",
+    sky: "clear",
+    weights: { temp: 25, dew: 10, wind: 20, sky: 30, visibility: 10, pressure: 5 },
+    targets: { temp: [86,88,16], dew: [54,56,16], wind: [8,12,16], pressure: [1012,1014,18] }
+  },
+  "Golf": {
+    tierLabel: "Golf Score",
+    sky: "clear",
+    weights: { temp: 25, dew: 10, wind: 40, sky: 10, visibility: 10, pressure: 5 },
+    targets: { temp: [66,70,14], dew: [50,53,15], wind: [0,5,14], pressure: [1012,1014,18] }
+  },
+  "Tailgate": {
+    tierLabel: "Tailgate Score",
+    sky: "clear",
+    weights: { temp: 30, dew: 15, wind: 15, sky: 25, visibility: 10, pressure: 5 },
+    targets: { temp: [65,70,15], dew: [54,56,15], wind: [5,8,15], pressure: [1015,1017,18] }
+  },
+  "Severe Weather": {
+    tierLabel: "Severe Weather Score",
+    sky: "cloudy",
+    weights: { temp: 20, dew: 30, wind: 25, sky: 15, visibility: 5, pressure: 5 },
+    targets: { temp: [85,90,18], dew: [65,70,16], wind: [15,20,18], pressure: [996,1004,22] }
+  }
+};
+
+function normalizeModeName(mode) {
+  const map = {
+    "Beach Day": "Beach",
+    "Golf Day": "Golf",
+    "Snow Day": "Winter",
+    "Storm Lover": "Severe Weather"
+  };
+  return map[mode] || mode || "Everyday";
+}
+
+function calculateModeScore(mode = els.mode?.value || "Everyday") {
+  const selectedMode = normalizeModeName(mode);
+  const breakdown = {};
+  const temp = numericValue(build["Temperature"]?.value);
+  const dew = numericValue(build["Dew Point"]?.value);
+  const wind = numericValue(build["Wind Speed"]?.value);
+  const visibility = numericValue(build["Visibility"]?.value);
+  const pressure = numericValue(build["Pressure"]?.value);
+  const skyText = build["Sky Cover"]?.value;
+
+  if (selectedMode === "Worst Day") {
+    const weights = { temp: 25, dew: 25, wind: 20, sky: 15, visibility: 10, pressure: 5 };
+    breakdown["Temperature"] = scoreWorstTemp(temp, weights.temp);
+    breakdown["Dew Point"] = scoreWorstDew(dew, weights.dew);
+    breakdown["Wind Speed"] = scoreWorstWind(wind, weights.wind);
+    breakdown["Sky Cover"] = scoreWorstSky(skyText, weights.sky);
+    breakdown["Visibility"] = scoreWorstVisibility(visibility, weights.visibility);
+    breakdown["Pressure"] = scoreWorstPressure(pressure, weights.pressure);
+  } else {
+    const config = scoringConfigs[selectedMode] || scoringConfigs["Everyday"];
+    const w = config.weights;
+    breakdown["Temperature"] = scoreTargetRange(temp, config.targets.temp[0], config.targets.temp[1], w.temp, config.targets.temp[2]);
+    breakdown["Dew Point"] = scoreTargetRange(dew, config.targets.dew[0], config.targets.dew[1], w.dew, config.targets.dew[2]);
+    breakdown["Wind Speed"] = scoreTargetRange(wind, config.targets.wind[0], config.targets.wind[1], w.wind, config.targets.wind[2]);
+    breakdown["Sky Cover"] = config.sky === "cloudy" ? scoreCloudySky(skyText, w.sky) : scoreClearSky(skyText, w.sky);
+    breakdown["Visibility"] = scoreVisibilityClear(visibility, w.visibility);
+    breakdown["Pressure"] = scoreTargetRange(pressure, config.targets.pressure[0], config.targets.pressure[1], w.pressure, config.targets.pressure[2]);
+  }
+
+  const total = Math.max(0, Math.min(100, Object.values(breakdown).reduce((sum, points) => sum + points, 0)));
+
+  let tier = "Rough Day";
+  if (selectedMode === "Worst Day") {
+    tier = "Not That Bad";
+    if (total >= 95) tier = "Nightmare Fuel";
+    else if (total >= 90) tier = "Disasterclass";
+    else if (total >= 80) tier = "Brutal";
+    else if (total >= 70) tier = "Miserable";
+    else if (total >= 60) tier = "Annoying";
+  } else {
+    if (total >= 95) tier = "Perfect Day";
+    else if (total >= 90) tier = "Elite";
+    else if (total >= 80) tier = "Great";
+    else if (total >= 70) tier = "Solid";
+    else if (total >= 60) tier = "Meh";
+  }
+
+  return { total, tier, breakdown, mode: selectedMode };
 }
 
 function calculateEverydayScore() {
-  const breakdown = {};
-
-  const temp = numericValue(build["Temperature"]?.value);
-  breakdown["Temperature"] = scoreRange(temp, [
-    { min: 70, max: 72, points: 20 },
-    { min: 68, max: 74, points: 18 },
-    { min: 65, max: 77, points: 15 },
-    { min: 60, max: 82, points: 10 },
-    { min: 55, max: 87, points: 5 }
-  ]);
-
-  const dew = numericValue(build["Dew Point"]?.value);
-  breakdown["Dew Point"] = scoreRange(dew, [
-    { min: 53, max: 55, points: 20 },
-    { min: 50, max: 58, points: 18 },
-    { min: 47, max: 61, points: 15 },
-    { min: 44, max: 64, points: 10 },
-    { min: 40, max: 68, points: 5 }
-  ]);
-
-  const wind = numericValue(build["Wind Speed"]?.value);
-  breakdown["Wind Speed"] = scoreRange(wind, [
-    { min: 5, max: 8, points: 20 },
-    { min: 3, max: 10, points: 18 },
-    { min: 1, max: 13, points: 15 },
-    { min: 14, max: 18, points: 10 },
-    { min: 19, max: 25, points: 5 }
-  ]);
-
-  breakdown["Sky Cover"] = scoreSky(build["Sky Cover"]?.value);
-  breakdown["Visibility"] = scoreVisibility(build["Visibility"]?.value);
-
-  const pressure = numericValue(build["Pressure"]?.value);
-  breakdown["Pressure"] = scoreRange(pressure, [
-    { min: 1012, max: 1014, points: 10 },
-    { min: 1010, max: 1016, points: 8 },
-    { min: 1008, max: 1018, points: 6 },
-    { min: 1005, max: 1021, points: 3 }
-  ]);
-
-  const total = Object.values(breakdown).reduce((sum, points) => sum + points, 0);
-
-  let tier = "Rough Day";
-  if (total >= 95) tier = "Perfect Day";
-  else if (total >= 90) tier = "Elite";
-  else if (total >= 80) tier = "Great";
-  else if (total >= 70) tier = "Solid";
-  else if (total >= 60) tier = "Meh";
-
-  return { total, tier, breakdown };
+  return calculateModeScore(els.mode?.value || "Everyday");
 }
 
 
@@ -1273,7 +1682,7 @@ function renderShareCard() {
     <div class="score-main">${score.total}<span>/100</span></div>
     <div>
       <div class="score-tier">${score.tier}</div>
-      <div class="score-sub">Everyday Score</div>
+      <div class="score-sub">${score.mode || els.mode.value} Score</div>
     </div>
   `;
   els.shareCardGrid.appendChild(scoreBlock);
@@ -1694,7 +2103,7 @@ async function downloadShareCard() {
   drawText(`${score.total}`, 145, 315, { size: 58, weight: 950, color: "#164eb8" });
   drawText("/100", 228, 315, { size: 26, weight: 950, color: "#164eb8" });
   drawText(score.tier.toUpperCase(), 330, 292, { size: 25, weight: 950, color: "#122033" });
-  drawText("Everyday Score", 330, 322, { size: 18, weight: 850, color: "#68768a" });
+  drawText(`${score.mode || els.mode.value} Score`, 330, 322, { size: 18, weight: 850, color: "#68768a" });
 
   // Rows
   let y = 275;
