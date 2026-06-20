@@ -5,17 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Perfect Day</title>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#276ef1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Perfect Day" />
-  <link rel="apple-touch-icon" href="/icons/icon-180.png" />
 </head>
 <body data-page="game">
 
   <header class="site-header">
     <a class="brand" href="/">Perfect Day</a>
+    <button id="siteMenuToggle" class="site-menu-toggle" type="button" aria-label="Open navigation">☰</button>
     <nav class="site-nav">
       <a href="/leaderboard.html" class="nav-link"><span class="nav-icon">📊</span> Leaderboard</a>
       <a href="/daily-challenge.html" class="nav-link"><span class="nav-icon">🗓️</span> Daily Challenge</a>
@@ -39,18 +34,6 @@
       <p class="eyebrow">Weather Draft Game</p>
       <h1>Perfect Day</h1>
       <p class="subtitle">Spin a U.S. region, pull a city, and draft one live NWS weather attribute to build your ideal day.</p>
-    </section>
-
-    <section id="installAppCard" class="install-app-card hidden">
-      <div>
-        <p class="small">Install the app</p>
-        <h2>Play Perfect Day from your home screen</h2>
-        <p>Install the game like an app for quicker Daily Challenges, leaderboards, and H2H matches.</p>
-      </div>
-      <div class="install-actions">
-        <button id="installAppBtn" type="button">Install App</button>
-        <button id="dismissInstallBtn" class="secondary" type="button">Not Now</button>
-      </div>
     </section>
     <section class="mode-card">
       <label for="mode">Game Mode</label>
@@ -191,6 +174,5 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
   <script src="supabase-app.js"></script>
-  <script src="/pwa.js"></script>
 </body>
 </html>

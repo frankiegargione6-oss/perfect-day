@@ -5,17 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Head-to-Head · Perfect Day</title>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#276ef1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Perfect Day" />
-  <link rel="apple-touch-icon" href="/icons/icon-180.png" />
 </head>
 <body data-page="head-to-head">
   <header class="site-header">
     <a class="back-home" href="/">← Back</a>
     <a class="brand" href="/">Perfect Day</a>
+    <button id="siteMenuToggle" class="site-menu-toggle" type="button" aria-label="Open navigation">☰</button>
     <nav class="site-nav">
       <a href="/leaderboard.html" class="nav-link"><span class="nav-icon">📊</span> Leaderboard</a>
       <a href="/daily-challenge.html" class="nav-link"><span class="nav-icon">🗓️</span> Daily Challenge</a>
@@ -88,6 +83,5 @@
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-app.js"></script>
-  <script src="/pwa.js"></script>
 </body>
 </html>
