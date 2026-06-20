@@ -10,6 +10,7 @@
 
   <header class="site-header">
     <a class="brand" href="/">Perfect Day</a>
+    <button id="siteMenuToggle" class="site-menu-toggle" type="button" aria-label="Open navigation">☰</button>
     <nav class="site-nav">
       <a href="/leaderboard.html" class="nav-link"><span class="nav-icon">📊</span> Leaderboard</a>
       <a href="/daily-challenge.html" class="nav-link"><span class="nav-icon">🗓️</span> Daily Challenge</a>
@@ -33,6 +34,7 @@
       <h1>Perfect Day</h1>
       <p class="subtitle">Spin a U.S. region, pull a city, and draft one live NWS weather attribute to build your ideal day.</p>
     </section>
+    <div class="quick-help-row"><button id="openHowToBtn" class="secondary mini" type="button">? How to Play</button></div>
     <section class="mode-card">
       <label for="mode">Game Mode</label>
       <select id="mode">
@@ -140,6 +142,44 @@
       </aside>
     </section>
   </main>
+
+
+    <div id="welcomeGate" class="modal-overlay hidden-modal onboarding-overlay">
+      <div class="modal-content onboarding-content">
+        <p class="eyebrow">Welcome to Perfect Day</p>
+        <h2>Build your perfect weather day</h2>
+        <p class="page-subtitle">Sign up or log in to save scores, climb leaderboards, earn XP, play friends, and keep your past games.</p>
+        <div class="onboarding-actions">
+          <a class="nav-button primary big-auth-btn" href="/signup.html">Sign Up</a>
+          <a class="nav-button big-auth-btn" href="/login.html">Log In</a>
+          <button id="continueGuestBtn" class="secondary big-auth-btn" type="button">Continue as Guest</button>
+        </div>
+        <p class="guest-note">Guests can play normally, but scores, history, daily challenge attempts, XP, and multiplayer results only save when logged in.</p>
+      </div>
+    </div>
+
+    <div id="howToPlayModal" class="modal-overlay hidden-modal onboarding-overlay">
+      <div class="modal-content onboarding-content">
+        <div class="modal-top">
+          <div>
+            <p class="eyebrow">How to Play</p>
+            <h2>Draft the best weather card</h2>
+          </div>
+          <button id="closeHowToBtn" class="secondary mini" type="button">Close</button>
+        </div>
+        <div class="how-to-grid">
+          <div class="how-to-step"><strong>1. Spin</strong><span>Spin for a random U.S. region and city using live NWS observations.</span></div>
+          <div class="how-to-step"><strong>2. Pick</strong><span>Choose one available variable from that city: temp, dew point, wind, sky, visibility, or pressure.</span></div>
+          <div class="how-to-step"><strong>3. Build</strong><span>Repeat until all six slots are filled. Each slot can only be drafted once.</span></div>
+          <div class="how-to-step"><strong>4. Re-spin</strong><span>You get one region re-spin and one city re-spin per game. Broken observations auto-reroll.</span></div>
+          <div class="how-to-step"><strong>5. Score</strong><span>Each mode has different perfect ranges and weights. A perfect build scores 100/100.</span></div>
+          <div class="how-to-step"><strong>6. Compete</strong><span>Log in to save scores, earn XP, play the Daily Challenge, and challenge friends.</span></div>
+        </div>
+        <div class="onboarding-actions">
+          <button id="startPlayingBtn" type="button">Start Playing</button>
+        </div>
+      </div>
+    </div>
 
 
     <div id="finalModal" class="modal-overlay hidden-modal">

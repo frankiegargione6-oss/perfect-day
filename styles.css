@@ -1206,3 +1206,144 @@ button.mini {
 .mode-option-card p { margin: 0; color: var(--muted); font-weight: 750; }
 [data-theme="dark"] .mode-option-icon { background: rgba(79, 140, 255, .18); }
 @media (max-width: 700px) { .mode-option-grid { grid-template-columns: 1fr; } }
+
+/* v0.26 onboarding + mobile polish */
+.site-menu-toggle {
+  display: none;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.78);
+  color: var(--text);
+  border-radius: 14px;
+  width: 46px;
+  height: 42px;
+  padding: 0;
+  font-size: 1.2rem;
+  box-shadow: 0 8px 22px rgba(20,45,80,.06);
+}
+.quick-help-row {
+  width: min(440px, 100%);
+  margin: -8px auto 16px;
+  display: flex;
+  justify-content: center;
+}
+.onboarding-content {
+  width: min(720px, 100%);
+}
+.onboarding-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.big-auth-btn {
+  min-width: 150px;
+  justify-content: center;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+}
+.guest-note {
+  color: var(--muted);
+  font-weight: 800;
+  margin: 16px 0 0;
+  line-height: 1.45;
+}
+.how-to-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.how-to-step {
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 18px;
+  padding: 14px;
+}
+.how-to-step strong {
+  display: block;
+  color: var(--text);
+  font-weight: 950;
+  margin-bottom: 6px;
+}
+.how-to-step span {
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.4;
+}
+:root[data-theme="dark"] .site-menu-toggle { background: #16243a; color: #dce9ff; }
+
+@media (max-width: 900px) {
+  .site-header {
+    width: min(100% - 20px, 1180px);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0 4px;
+  }
+  .site-header .back-home { grid-column: 1 / -1; width: fit-content; }
+  .brand { font-size: 1.15rem; }
+  .site-menu-toggle { display: inline-grid; place-items: center; justify-self: end; }
+  .site-nav, .account-nav {
+    grid-column: 1 / -1;
+    display: none;
+    width: 100%;
+    align-items: stretch;
+  }
+  body.nav-open .site-nav,
+  body.nav-open .account-nav {
+    display: flex;
+  }
+  .site-nav {
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+  }
+  .account-nav {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-top: 2px;
+  }
+  .nav-auth { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .nav-link, .nav-button, .nav-user {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 12px 14px;
+  }
+  .theme-toggle { width: 44px; height: 44px; flex: 0 0 auto; }
+  .app { width: min(100% - 22px, 1180px); padding: 24px 0; }
+  .hero { margin-bottom: 18px; }
+  h1 { font-size: clamp(2.55rem, 16vw, 4.3rem); }
+  .subtitle { font-size: .98rem; }
+  .mode-card { align-items: stretch; flex-direction: column; padding: 14px; }
+  .mode-card select { width: 100%; }
+  .panel, .page-card { border-radius: 22px; padding: 18px; }
+  .game-grid { gap: 16px; }
+  .round-header, .city-line, .final-top, .actions { gap: 12px; }
+  .spin-actions, .actions { width: 100%; }
+  .spin-actions button, .actions button { width: 100%; }
+  .respin-bar { display: grid; grid-template-columns: 1fr; }
+  .wheel-card { padding: 14px; }
+  .wheel-display { min-height: 62px; font-size: 1.45rem; }
+  .attribute { padding: 13px; }
+  .attribute .value { font-size: 1.05rem; }
+  .share-card { border-radius: 22px; padding: 16px; }
+  .modal-overlay { padding: 14px; }
+  .modal-content { border-radius: 22px; padding: 18px; }
+  .how-to-grid { grid-template-columns: 1fr; }
+  .onboarding-actions { display: grid; grid-template-columns: 1fr; }
+  .big-auth-btn { width: 100%; }
+}
+
+@media (max-width: 520px) {
+  .site-header { width: calc(100% - 16px); }
+  .app { width: calc(100% - 16px); }
+  .page-title { font-size: 2.35rem; }
+  .draft-slot { align-items: flex-start; flex-direction: column; }
+  .draft-slot .pick { text-align: left; }
+  .share-card-header { align-items: flex-start; }
+  .score-block { align-items: flex-start; flex-direction: column; }
+  .weather-icon { width: 50px; height: 50px; }
+}

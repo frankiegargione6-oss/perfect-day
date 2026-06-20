@@ -116,6 +116,7 @@ async function refreshNav() {
     navGuest.classList.remove("hidden");
     navUser.classList.add("hidden");
     if (navUsername) navUsername.textContent = "Profile";
+    if (typeof showWelcomeGateIfNeeded === "function") showWelcomeGateIfNeeded();
     return;
   }
 
@@ -124,6 +125,8 @@ async function refreshNav() {
   navGuest.classList.add("hidden");
   navUser.classList.remove("hidden");
   if (navUsername) navUsername.textContent = username;
+  if ($("welcomeGate")) $("welcomeGate").classList.add("hidden-modal");
+  if (typeof showHowToPlay === "function" && pageName() === "game") showHowToPlay(false);
 }
 
 async function getOrCreateProfile(preferredUsername = "") {
@@ -1148,3 +1151,56 @@ function bindPageButtons() {
 initTheme();
 bindPageButtons();
 initSupabase();
+
+// v0.26: onboarding, guest flow, and mobile nav
+function initMobileNav() {
+  const btn = $("siteMenuToggle");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    document.body.classList.toggle("nav-open");
+    btn.textContent = document.body.classList.contains("nav-open") ? "✕" : "☰";
+  });
+}
+
+function showHowToPlay(force = false) {
+  const modal = $("howToPlayModal");
+  if (!modal) return;
+  if (!force && localStorage.getItem("perfectDayHowToSeen") === "yes") return;
+  modal.classList.remove("hidden-modal");
+}
+
+function closeHowToPlay() {
+  localStorage.setItem("perfectDayHowToSeen", "yes");
+  $("howToPlayModal")?.classList.add("hidden-modal");
+}
+
+function showWelcomeGateIfNeeded() {
+  if (pageName() !== "game") return;
+  const gate = $("welcomeGate");
+  if (!gate) return;
+  const guestOk = sessionStorage.getItem("perfectDayGuestOk") === "yes";
+  if (!loggedInUser && !guestOk) {
+    gate.classList.remove("hidden-modal");
+  } else if (loggedInUser) {
+    gate.classList.add("hidden-modal");
+  }
+}
+
+function initOnboardingControls() {
+  $("continueGuestBtn")?.addEventListener("click", () => {
+    sessionStorage.setItem("perfectDayGuestOk", "yes");
+    $("welcomeGate")?.classList.add("hidden-modal");
+    showHowToPlay(false);
+  });
+  $("closeHowToBtn")?.addEventListener("click", closeHowToPlay);
+  $("startPlayingBtn")?.addEventListener("click", closeHowToPlay);
+  $("openHowToBtn")?.addEventListener("click", () => showHowToPlay(true));
+}
+
+// Attach after the original initialization calls above.
+initMobileNav();
+initOnboardingControls();
+setTimeout(() => {
+  showWelcomeGateIfNeeded();
+  if (pageName() === "game" && (loggedInUser || sessionStorage.getItem("perfectDayGuestOk") === "yes")) showHowToPlay(false);
+}, 900);
