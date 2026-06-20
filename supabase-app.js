@@ -1,4 +1,4 @@
-// Perfect Day v0.21 Supabase auth, profiles, friends, head-to-head, leaderboard, daily challenge
+// Perfect Day v0.25 scoring season reset, profiles, friends, head-to-head, leaderboard, daily challenge
 const SUPABASE_URL = "https://naphnmpmujupkfpkuhhu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hcGhubXBtdWp1cGtmcGt1aGh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MjQ2MjksImV4cCI6MjA5NzQwMDYyOX0.voAllZifeoMqMGvCJaeIyE1XX2lt6KNElPkXXfJ5_OA";
 
@@ -6,6 +6,7 @@ let supabaseClient = null;
 let loggedInUser = null;
 let currentProfile = null;
 let lastSavedGameSignature = null;
+const CURRENT_SCORING_VERSION = "weighted_v1";
 
 function $(id) { return document.getElementById(id); }
 function pageName() { return document.body?.dataset?.page || "game"; }
@@ -273,6 +274,7 @@ async function saveCompletedGame() {
     mode,
     score_tier: score.tier,
     game_data: build,
+    scoring_version: CURRENT_SCORING_VERSION,
     guesses_used: slots.length,
     respins_used: respinsUsed,
     completed: true
@@ -311,6 +313,7 @@ function buildLeaderboardRows(rows, selectedMode = "All Modes") {
       username: row.profiles?.username || "Unknown Player",
       bestScore: 0,
       bestTier: "Score",
+      bestMode: row.mode || "Everyday",
       bestDate: row.created_at,
       bestGameId: row.id,
       bestGameData: row.game_data,
@@ -325,6 +328,7 @@ function buildLeaderboardRows(rows, selectedMode = "All Modes") {
     if ((row.score || 0) > existing.bestScore) {
       existing.bestScore = row.score || 0;
       existing.bestTier = row.score_tier || "Score";
+      existing.bestMode = row.mode || "Everyday";
       existing.bestDate = row.created_at;
       existing.bestGameId = row.id;
       existing.bestGameData = row.game_data;
@@ -363,7 +367,7 @@ function renderLeaderboard() {
         <div class="data-rank">#${realRank}</div>
         <div>
           <div class="data-main">${profileLink(row.user_id, row.username)} <span class="level-pill">Lv. ${row.levelInfo.level}</span></div>
-          <div class="data-sub">${cachedLeaderboardMode} · ${row.bestTier} · ${row.games} game${row.games === 1 ? "" : "s"} · ${row.levelInfo.totalXp} XP</div>
+          <div class="data-sub">Season 2 · ${cachedLeaderboardMode} · ${row.bestTier} · ${row.games} game${row.games === 1 ? "" : "s"} · ${row.levelInfo.totalXp} XP</div>
         </div>
         <div class="row-actions"><div class="data-score">${row.bestScore}/100</div><button class="mini secondary" data-view-game-card="${row.user_id}">View Card</button></div>
       </div>
@@ -372,7 +376,7 @@ function renderLeaderboard() {
 
   list.querySelectorAll("[data-view-game-card]").forEach(btn => btn.addEventListener("click", () => {
     const row = rows.find(r => r.user_id === btn.dataset.viewGameCard);
-    showGameCardModal(row?.username || "Player", row?.bestScore || 0, row?.bestTier || "Completed", row?.mode || cachedLeaderboardMode, row?.bestGameData || {});
+    showGameCardModal(row?.username || "Player", row?.bestScore || 0, row?.bestTier || "Completed", row?.bestMode || cachedLeaderboardMode, row?.bestGameData || {});
   }));
 
   if (moreBtn) {
@@ -403,8 +407,9 @@ async function loadLeaderboard() {
   list.innerHTML = "Loading leaderboard...";
   const { data, error } = await supabaseClient
     .from("game_scores")
-    .select("id, user_id, score, mode, score_tier, created_at, game_data, profiles(username)")
+    .select("id, user_id, score, mode, score_tier, created_at, game_data, scoring_version, profiles(username)")
     .eq("completed", true)
+    .eq("scoring_version", CURRENT_SCORING_VERSION)
     .order("score", { ascending: false })
     .limit(1000);
 
@@ -595,10 +600,11 @@ async function loadPublicProfile() {
   if (!playerId) { box.innerHTML = `<div class="empty-state">No player selected.</div>`; return; }
   const { data: profile, error } = await supabaseClient.from("profiles").select("id, username, created_at").eq("id", playerId).maybeSingle();
   if (error || !profile) { box.innerHTML = `<div class="empty-state">Player not found.</div>`; return; }
-  const { data: scores } = await supabaseClient.from("game_scores").select("score, mode, score_tier, created_at").eq("user_id", playerId).eq("completed", true).limit(1000);
+  const { data: scores } = await supabaseClient.from("game_scores").select("score, mode, score_tier, created_at, scoring_version").eq("user_id", playerId).eq("completed", true).limit(1000);
   const games = scores || [];
   const bestScore = games.length ? Math.max(...games.map(s => s.score || 0)) : 0;
   const avgScore = games.length ? Math.round(games.reduce((sum, s) => sum + (s.score || 0), 0) / games.length) : 0;
+  const perfectCount = games.filter(s => Number(s.score) === 100).length;
   const totalXp = games.reduce((sum, s) => sum + scoreToXp(s.score), 0);
   const levelInfo = calculateLevel(totalXp);
   const friendIds = loggedInUser ? await getFriendIdSet() : new Set();
@@ -607,7 +613,7 @@ async function loadPublicProfile() {
   const vsStats = loggedInUser && !isMe ? await getH2HStats(loggedInUser.id, playerId) : null;
   const vsBlock = vsStats ? `<div class="social-section compact"><p class="eyebrow">Head-to-Head vs ${escapeHtml(profile.username)}</p><h2>${vsStats.wins}-${vsStats.losses}${vsStats.ties ? `-${vsStats.ties}` : ""}</h2><p class="account-subtitle">Your record against this player</p></div>` : "";
   const friendButton = isMe ? `<a class="nav-button" href="/profile.html">Your Profile</a>` : (loggedInUser ? `<button id="publicAddFriendBtn" type="button" ${friendIds.has(playerId) ? "disabled" : ""}>${friendIds.has(playerId) ? "Already Friends" : "Add Friend"}</button>` : `<a class="nav-button primary" href="/login.html">Log in to add friend</a>`);
-  box.innerHTML = `<div class="profile-card-inner"><div><p class="eyebrow">Player Profile</p><h2>${escapeHtml(profile.username)} <span class="level-pill big">Lv. ${levelInfo.level}</span></h2><p class="account-subtitle">${totalXp} XP · Joined ${new Date(profile.created_at).toLocaleDateString()}</p></div><div class="profile-stats"><div><strong>${games.length}</strong><span>Games</span></div><div><strong>${bestScore}</strong><span>Best</span></div><div><strong>${avgScore}</strong><span>Avg</span></div><div><strong>${overallH2H.wins}-${overallH2H.losses}${overallH2H.ties ? `-${overallH2H.ties}` : ""}</strong><span>H2H</span></div></div><div>${friendButton}</div>${vsBlock}<div class="social-section"><div class="page-heading-row"><div><p class="eyebrow">Friends</p><h2>Friend List</h2></div></div><div id="publicFriendsList" class="data-list">Loading friends...</div></div></div>`;
+  box.innerHTML = `<div class="profile-card-inner"><div><p class="eyebrow">Player Profile</p><h2>${escapeHtml(profile.username)} <span class="level-pill big">Lv. ${levelInfo.level}</span></h2><p class="account-subtitle">${totalXp} XP · Joined ${new Date(profile.created_at).toLocaleDateString()}</p></div><div class="profile-stats"><div><strong>${games.length}</strong><span>Games</span></div><div><strong>${bestScore}</strong><span>Best</span></div><div><strong>${avgScore}</strong><span>Avg</span></div><div><strong>${perfectCount}</strong><span>100/100s</span></div><div><strong>${overallH2H.wins}-${overallH2H.losses}${overallH2H.ties ? `-${overallH2H.ties}` : ""}</strong><span>H2H</span></div></div><div>${friendButton}</div>${vsBlock}<div class="social-section"><div class="page-heading-row"><div><p class="eyebrow">Friends</p><h2>Friend List</h2></div></div><div id="publicFriendsList" class="data-list">Loading friends...</div></div></div>`;
   $("publicAddFriendBtn")?.addEventListener("click", () => sendFriendRequest(playerId));
   await loadFriendsList(playerId, "publicFriendsList");
 }
@@ -865,7 +871,7 @@ async function getUserScores() {
   if (!loggedInUser || !supabaseClient) return [];
   const { data, error } = await supabaseClient
     .from("game_scores")
-    .select("score, mode, score_tier, created_at, game_data, respins_used")
+    .select("score, mode, score_tier, created_at, game_data, respins_used, scoring_version")
     .eq("user_id", loggedInUser.id)
     .order("created_at", { ascending: false })
     .limit(1000);
@@ -892,6 +898,7 @@ async function loadProfile() {
   const gamesPlayed = scores.length;
   const bestScore = gamesPlayed ? Math.max(...scores.map(s => s.score || 0)) : 0;
   const avgScore = gamesPlayed ? Math.round(scores.reduce((sum, s) => sum + (s.score || 0), 0) / gamesPlayed) : 0;
+  const perfectCount = scores.filter(s => Number(s.score) === 100).length;
   const totalXp = scores.reduce((sum, s) => sum + scoreToXp(s.score), 0);
   const levelInfo = calculateLevel(totalXp);
   const achievements = getAchievementDefinitions(scores);
@@ -913,6 +920,7 @@ async function loadProfile() {
         <div><strong>${gamesPlayed}</strong><span>Games</span></div>
         <div><strong>${bestScore}</strong><span>Best</span></div>
         <div><strong>${avgScore}</strong><span>Avg</span></div>
+        <div><strong>${perfectCount}</strong><span>100/100s</span></div>
         <div><strong>${unlockedCount}/${achievements.length}</strong><span>Badges</span></div>
         <div><strong>${h2hStats.wins}-${h2hStats.losses}${h2hStats.ties ? `-${h2hStats.ties}` : ""}</strong><span>H2H</span></div>
       </div>

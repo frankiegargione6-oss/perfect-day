@@ -110,3 +110,12 @@ Do not double-click `index.html`; the local server has to be running.
 - Added new weighted scoring formulas for Everyday, Summer, Winter, Beach, Golf, Tailgate, Severe Weather, and Worst Day.
 - Updated all mode dropdowns to the new mode list.
 - No new Supabase SQL required.
+
+
+## v0.25 changes
+
+- Starts Season 2 leaderboard for the new weighted scoring system.
+- Keeps old games in Past Games and profile totals.
+- Adds a 100/100 games stat to profiles.
+- Moves Group Play and Team Mode into the Head-to-Head page to reduce nav clutter.
+- Requires running `supabase_season_update.sql` before deploying.
