@@ -488,29 +488,49 @@ function getAchievementDefinitions(scores) {
   const skyTexts = allPicks.map(p => String(p?.value || "").toLowerCase());
   const pressureValues = allPicks.filter(p => String(p?.value || "").includes("hPa")).map(numericFromPick).filter(v => v !== null);
 
+  const regions = new Set(allPicks.map(p => p?.region || p?.city_region || p?.cityRegion || "").filter(Boolean));
+  const cities = new Set(allPicks.map(p => p?.city || "").filter(Boolean));
+  const perfectGames = games.filter(g => Number(g.score) === 100).length;
+  const dailyGames = games.filter(g => (g.mode || "") === "Daily Challenge");
+
   return [
-    { icon: "🎮", title: "First Spin", description: "Complete your first logged-in game.", unlocked: games.length >= 1 },
-    { icon: "💯", title: "Perfect Day", description: "Score a 100.", unlocked: hasScore(100) },
-    { icon: "🔥", title: "Elite Builder", description: "Score 90 or higher.", unlocked: hasScore(90) },
-    { icon: "🌤️", title: "Great Forecast", description: "Score 80 or higher.", unlocked: hasScore(80) },
-    { icon: "🎯", title: "No-Respin Run", description: "Finish a game without using either respin.", unlocked: hasNoRespins },
-    { icon: "🧭", title: "Mode Explorer", description: "Complete games in at least 3 modes.", unlocked: modes.size >= 3 },
-    { icon: "🏖️", title: "Beach Regular", description: "Complete a Beach game.", unlocked: modes.has("Beach") || modes.has("Beach Day") },
-    { icon: "🏈", title: "Tailgate Tested", description: "Complete a Tailgate game.", unlocked: modes.has("Tailgate") },
-    { icon: "⛳", title: "Fairway Weather", description: "Complete a Golf game.", unlocked: modes.has("Golf") || modes.has("Golf Day") },
-    { icon: "❄️", title: "Winter Starter", description: "Complete a Winter game.", unlocked: modes.has("Winter") || modes.has("Snow Day") },
-    { icon: "⛈️", title: "Severe Setup", description: "Complete a Severe Weather game.", unlocked: modes.has("Severe Weather") || modes.has("Storm Lover") },
-    { icon: "☀️", title: "Summer Scorcher", description: "Complete a Summer game.", unlocked: modes.has("Summer") },
-    { icon: "💀", title: "Worst Day Builder", description: "Complete a Worst Day game.", unlocked: modes.has("Worst Day") },
-    { icon: "🌡️", title: "Heat Lover", description: "Draft a temperature of 95°F or hotter.", unlocked: tempValues.some(v => v >= 95) },
-    { icon: "🧊", title: "Cold Snap", description: "Draft a temperature of 32°F or colder.", unlocked: tempValues.some(v => v <= 32) },
-    { icon: "💨", title: "Wind Warrior", description: "Draft wind of 25 mph or stronger.", unlocked: windValues.some(v => v >= 25) },
-    { icon: "☀️", title: "Clear Skies", description: "Draft a clear or sunny sky cover.", unlocked: skyTexts.some(t => t.includes("clear") || t.includes("sunny")) },
-    { icon: "📈", title: "Pressure Peak", description: "Draft pressure of 1025 hPa or higher.", unlocked: pressureValues.some(v => v >= 1025) },
-    { icon: "🔁", title: "Regular", description: "Complete 10 games.", unlocked: games.length >= 10 },
-    { icon: "🏅", title: "Veteran", description: "Complete 25 games.", unlocked: games.length >= 25 },
-    { icon: "👑", title: "Weather Legend", description: "Reach 10,000 lifetime XP.", unlocked: totalXp >= 10000 }
+    { icon: "🎮", title: "First Spin", description: "Complete your first logged-in game.", xp: 50, unlocked: games.length >= 1 },
+    { icon: "💯", title: "Perfect Day", description: "Score a 100.", xp: 250, unlocked: perfectGames >= 1 },
+    { icon: "🏆", title: "Perfectionist", description: "Score 5 perfect 100/100 games.", xp: 750, unlocked: perfectGames >= 5 },
+    { icon: "👑", title: "Weather Wizard", description: "Score 10 perfect 100/100 games.", xp: 1500, unlocked: perfectGames >= 10 },
+    { icon: "🔥", title: "Elite Builder", description: "Score 90 or higher.", xp: 100, unlocked: hasScore(90) },
+    { icon: "🌤️", title: "Great Forecast", description: "Score 80 or higher.", xp: 75, unlocked: hasScore(80) },
+    { icon: "🎯", title: "No-Respin Run", description: "Finish a game without using either respin.", xp: 150, unlocked: hasNoRespins },
+    { icon: "🧭", title: "Mode Explorer", description: "Complete games in at least 3 modes.", xp: 150, unlocked: modes.size >= 3 },
+    { icon: "🌎", title: "Mode Master", description: "Complete games in every main mode.", xp: 500, unlocked: ["Everyday","Summer","Winter","Beach","Golf","Tailgate","Severe Weather","Worst Day"].every(m => modes.has(m)) },
+    { icon: "🏖️", title: "Beach Regular", description: "Complete a Beach game.", xp: 75, unlocked: modes.has("Beach") || modes.has("Beach Day") },
+    { icon: "🏈", title: "Tailgate Tested", description: "Complete a Tailgate game.", xp: 75, unlocked: modes.has("Tailgate") },
+    { icon: "⛳", title: "Fairway Weather", description: "Complete a Golf game.", xp: 75, unlocked: modes.has("Golf") || modes.has("Golf Day") },
+    { icon: "❄️", title: "Winter Starter", description: "Complete a Winter game.", xp: 75, unlocked: modes.has("Winter") || modes.has("Snow Day") },
+    { icon: "⛈️", title: "Severe Setup", description: "Complete a Severe Weather game.", xp: 75, unlocked: modes.has("Severe Weather") || modes.has("Storm Lover") },
+    { icon: "☀️", title: "Summer Scorcher", description: "Complete a Summer game.", xp: 75, unlocked: modes.has("Summer") },
+    { icon: "💀", title: "Worst Day Builder", description: "Complete a Worst Day game.", xp: 75, unlocked: modes.has("Worst Day") },
+    { icon: "🌡️", title: "Heat Lover", description: "Draft a temperature of 95°F or hotter.", xp: 100, unlocked: tempValues.some(v => v >= 95) },
+    { icon: "🧊", title: "Cold Snap", description: "Draft a temperature of 32°F or colder.", xp: 100, unlocked: tempValues.some(v => v <= 32) },
+    { icon: "💨", title: "Wind Warrior", description: "Draft wind of 25 mph or stronger.", xp: 100, unlocked: windValues.some(v => v >= 25) },
+    { icon: "☀️", title: "Clear Skies", description: "Draft a clear or sunny sky cover.", xp: 75, unlocked: skyTexts.some(t => t.includes("clear") || t.includes("sunny")) },
+    { icon: "🌧️", title: "Rain Game", description: "Draft rain, drizzle, showers, or storms.", xp: 125, unlocked: skyTexts.some(t => t.includes("rain") || t.includes("drizzle") || t.includes("shower") || t.includes("thunder")) },
+    { icon: "📈", title: "Pressure Peak", description: "Draft pressure of 1025 hPa or higher.", xp: 100, unlocked: pressureValues.some(v => v >= 1025) },
+    { icon: "🌴", title: "Island Hopper", description: "Draft a city from Alaska, Hawaii, or the territories.", xp: 200, unlocked: allPicks.some(p => /AK|HI|Guam|Saipan|Pago Pago|San Juan|Puerto Rico|VI|AS|MP/.test(String(p?.city || ""))) },
+    { icon: "🗺️", title: "City Collector", description: "Draft from 25 different cities.", xp: 250, unlocked: cities.size >= 25 },
+    { icon: "🌍", title: "World Traveler", description: "Draft from 50 different cities.", xp: 750, unlocked: cities.size >= 50 },
+    { icon: "📅", title: "Daily Starter", description: "Complete 3 Daily Challenges.", xp: 100, unlocked: dailyGames.length >= 3 },
+    { icon: "🔥", title: "Daily Grinder", description: "Complete 10 Daily Challenges.", xp: 300, unlocked: dailyGames.length >= 10 },
+    { icon: "🔁", title: "Regular", description: "Complete 10 games.", xp: 150, unlocked: games.length >= 10 },
+    { icon: "🏅", title: "Veteran", description: "Complete 25 games.", xp: 300, unlocked: games.length >= 25 },
+    { icon: "💎", title: "Addicted", description: "Complete 100 games.", xp: 1500, unlocked: games.length >= 100 },
+    { icon: "👑", title: "Weather Legend", description: "Reach 10,000 lifetime XP.", xp: 1000, unlocked: totalXp >= 10000 }
   ];
+}
+
+
+function achievementXpBonus(scores) {
+  return getAchievementDefinitions(scores).filter(a => a.unlocked).reduce((sum, a) => sum + (Number(a.xp) || 0), 0);
 }
 
 async function getFriendRows() {
@@ -959,10 +979,12 @@ async function loadAchievements() {
   const scores = await getUserScores();
   const achievements = getAchievementDefinitions(scores);
   const unlocked = achievements.filter(a => a.unlocked).length;
-  const totalXp = scores.reduce((sum, s) => sum + scoreToXp(s.score), 0);
+  const gameXp = scores.reduce((sum, s) => sum + scoreToXp(s.score), 0);
+  const achievementXp = achievementXpBonus(scores);
+  const totalXp = gameXp + achievementXp;
   const levelInfo = calculateLevel(totalXp);
 
-  summary.innerHTML = `<strong>${unlocked}/${achievements.length}</strong> achievements unlocked · Level ${levelInfo.level} · ${levelInfo.totalXp} XP`;
+  summary.innerHTML = `<strong>${unlocked}/${achievements.length}</strong> achievements unlocked · ${achievementXp} achievement XP · Level ${levelInfo.level}`;
   list.innerHTML = achievements.map(a => `
     <article class="achievement-card ${a.unlocked ? "unlocked" : "locked"}">
       <div class="achievement-icon">${a.icon}</div>
@@ -970,7 +992,7 @@ async function loadAchievements() {
         <h3>${a.title}</h3>
         <p>${a.description}</p>
       </div>
-      <span class="achievement-state">${a.unlocked ? "Unlocked" : "Locked"}</span>
+      <span class="achievement-state">${a.unlocked ? `+${a.xp || 0} XP` : `${a.xp || 0} XP`}</span>
     </article>
   `).join("");
 }
@@ -1083,7 +1105,14 @@ async function loadDailyHistory() {
     list.innerHTML = `<div class="empty-state">No Daily Challenges completed yet.</div>`;
     return;
   }
-  list.innerHTML = `<div class="daily-streak-card"><strong>🔥 ${streak}</strong><span>day streak</span></div>` + data.map(row => `
+  const daySet = new Set((data || []).map(r => new Date(r.created_at).toLocaleDateString("en-CA")));
+  const cells = [];
+  for (let i = 59; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toLocaleDateString("en-CA");
+    cells.push(`<span class="streak-cell ${daySet.has(key) ? "done" : "missed"}" title="${key}"></span>`);
+  }
+  list.innerHTML = `<div class="daily-streak-card"><strong>🔥 ${streak}</strong><span>day streak</span></div><div class="streak-grid">${cells.join("")}</div>` + data.map(row => `
     <div class="data-row">
       <div class="data-rank">📅</div>
       <div>
@@ -1126,6 +1155,87 @@ async function loadDailyChallenge() {
   await loadDailyHistory();
 }
 
+function modeLabel(mode) { return mode || "Everyday"; }
+function mostCommon(values, fallback = "—") {
+  const counts = new Map();
+  values.filter(v => v !== null && v !== undefined && String(v).trim() !== "").forEach(v => {
+    const key = String(v);
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+  let best = fallback, bestCount = 0;
+  for (const [key, count] of counts.entries()) {
+    if (count > bestCount) { best = key; bestCount = count; }
+  }
+  return { value: best, count: bestCount };
+}
+function roundedDraftValue(item, suffixMatch) {
+  const n = numericFromPick(item);
+  if (n === null) return null;
+  return Math.round(n).toString() + suffixMatch;
+}
+async function loadStatsPage() {
+  const grid = $("globalStatsGrid");
+  const draftList = $("draftStatsList");
+  const modeList = $("modeStatsList");
+  if (!grid || !draftList || !modeList || !supabaseClient) return;
+  grid.innerHTML = "Loading community stats...";
+  const { data, error } = await supabaseClient
+    .from("game_scores")
+    .select("id, user_id, score, mode, score_tier, created_at, game_data, scoring_version, profiles(username)")
+    .eq("completed", true)
+    .order("created_at", { ascending: false })
+    .limit(5000);
+  if (error) {
+    grid.textContent = error.message;
+    draftList.textContent = error.message;
+    modeList.textContent = error.message;
+    return;
+  }
+  const rows = data || [];
+  const users = new Set(rows.map(r => r.user_id).filter(Boolean));
+  const avg = rows.length ? Math.round(rows.reduce((sum, r) => sum + (Number(r.score) || 0), 0) / rows.length) : 0;
+  const best = rows.reduce((a, r) => (Number(r.score) || 0) > (Number(a?.score) || -1) ? r : a, null);
+  const today = rows.filter(r => new Date(r.created_at) >= new Date(startOfTodayISO())).length;
+  const perfects = rows.filter(r => Number(r.score) === 100).length;
+  const allPicks = rows.flatMap(r => Object.entries(r.game_data || {}).map(([slot, item]) => ({ slot, ...(item || {}) })));
+  const cityMost = mostCommon(allPicks.map(p => p.city));
+  const tempMost = mostCommon(allPicks.filter(p => p.slot === "Temperature").map(p => roundedDraftValue(p, "°F")));
+  const dewMost = mostCommon(allPicks.filter(p => p.slot === "Dew Point").map(p => roundedDraftValue(p, "°F")));
+  const windMost = mostCommon(allPicks.filter(p => p.slot === "Wind Speed").map(p => roundedDraftValue(p, " mph")));
+  const skyMost = mostCommon(allPicks.filter(p => p.slot === "Sky Cover").map(p => String(p.value || "").split(" · ")[0]));
+  const modeMost = mostCommon(rows.map(r => modeLabel(r.mode)));
+
+  grid.innerHTML = `
+    <div class="stat-tile"><span>Total games</span><strong>${rows.length}</strong></div>
+    <div class="stat-tile"><span>Players</span><strong>${users.size}</strong></div>
+    <div class="stat-tile"><span>Games today</span><strong>${today}</strong></div>
+    <div class="stat-tile"><span>Average score</span><strong>${avg}/100</strong></div>
+    <div class="stat-tile"><span>Perfect scores</span><strong>${perfects}</strong></div>
+    <div class="stat-tile"><span>Highest score</span><strong>${best ? `${best.score}/100` : "—"}</strong><em>${best ? `${escapeHtml(best.profiles?.username || "Player")} · ${escapeHtml(best.mode || "Everyday")}` : ""}</em></div>
+    <div class="stat-tile"><span>Most played mode</span><strong>${escapeHtml(modeMost.value)}</strong><em>${modeMost.count} games</em></div>
+    <div class="stat-tile"><span>Most drafted city</span><strong>${escapeHtml(cityMost.value)}</strong><em>${cityMost.count} picks</em></div>
+  `;
+  const draftRows = [
+    ["📍", "Most drafted city", cityMost],
+    ["🌡️", "Most drafted temperature", tempMost],
+    ["💧", "Most drafted dew point", dewMost],
+    ["💨", "Most drafted wind", windMost],
+    ["🌤️", "Most drafted sky", skyMost]
+  ];
+  draftList.innerHTML = draftRows.map(([icon, label, stat]) => `<div class="data-row"><div class="data-rank">${icon}</div><div><div class="data-main">${escapeHtml(label)}</div><div class="data-sub">${stat.count} draft${stat.count === 1 ? "" : "s"}</div></div><div class="data-score small-score">${escapeHtml(stat.value)}</div></div>`).join("");
+  const modeMap = new Map();
+  rows.forEach(r => {
+    const m = modeLabel(r.mode);
+    const current = modeMap.get(m) || { mode: m, games: 0, total: 0, best: 0 };
+    current.games += 1;
+    current.total += Number(r.score) || 0;
+    current.best = Math.max(current.best, Number(r.score) || 0);
+    modeMap.set(m, current);
+  });
+  const modeRows = [...modeMap.values()].sort((a,b) => b.games - a.games);
+  modeList.innerHTML = modeRows.length ? modeRows.map(row => `<div class="data-row"><div class="data-rank">🎮</div><div><div class="data-main">${escapeHtml(row.mode)}</div><div class="data-sub">Avg ${Math.round(row.total / row.games)}/100 · Best ${row.best}/100</div></div><div class="data-score">${row.games}</div></div>`).join("") : `<div class="empty-state">No community stats yet.</div>`;
+}
+
 async function routePageLoad() {
   const page = pageName();
   if (page === "leaderboard") await loadLeaderboard();
@@ -1133,6 +1243,7 @@ async function routePageLoad() {
   if (page === "profile") await loadProfile();
   if (page === "achievements") await loadAchievements();
   if (page === "daily-challenge") await loadDailyChallenge();
+  if (page === "stats") await loadStatsPage();
   if (page === "friends") await loadFriendsPage();
   if (page === "public-profile") await loadPublicProfile();
   if (page === "head-to-head") await loadH2HPage();

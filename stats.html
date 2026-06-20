@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Friends · Perfect Day</title>
+  <title>Community Stats · Perfect Day</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
-<body data-page="friends">
+<body data-page="stats">
   <header class="site-header">
     <a class="back-home" href="/">← Back</a>
     <a class="brand" href="/">Perfect Day</a>
+    <button id="siteMenuToggle" class="site-menu-toggle" type="button" aria-label="Open navigation">☰</button>
     <nav class="site-nav">
       <a href="/leaderboard.html" class="nav-link"><span class="nav-icon">📊</span> Leaderboard</a>
       <a href="/daily-challenge.html" class="nav-link"><span class="nav-icon">🗓️</span> Daily Challenge</a>
@@ -28,36 +29,22 @@
       <a id="navUser" href="/profile.html" class="nav-user hidden"><span class="profile-icon">👤</span><span id="navUsername">Profile</span></a>
     </div>
   </header>
-  <main class="app slim-app">
-    <section class="hero">
-      <p class="eyebrow">Social</p>
-      <h1 class="page-title">Friends</h1>
-      <p class="subtitle">Search players, send friend requests, and manage invites.</p>
+  <main class="app page-shell">
+    <section class="hero small-hero">
+      <p class="eyebrow">Community</p>
+      <h1>Global Stats</h1>
+      <p class="subtitle">See what the Perfect Day community is drafting most.</p>
     </section>
-
     <section class="page-card">
-      <div class="page-heading-row">
-        <div>
-          <p class="eyebrow">Find players</p>
-          <h2>Add Friends</h2>
-        </div>
-      </div>
-      <form id="friendSearchForm" class="stack-form inline-form">
-        <input id="friendSearchInput" type="text" placeholder="Search username" />
-        <button type="submit">Search</button>
-      </form>
-      <p id="pageStatus" class="page-status"></p>
-      <div id="friendSearchResults" class="data-list"></div>
+      <div id="globalStatsGrid" class="stats-grid">Loading community stats...</div>
     </section>
-
-    <section class="page-card social-section">
-      <div class="page-heading-row"><div><p class="eyebrow">Requests</p><h2>Friend Invites</h2></div></div>
-      <div id="friendRequestsList" class="data-list">Loading requests...</div>
+    <section class="page-card">
+      <div class="page-heading-row"><div><p class="eyebrow">Drafting Trends</p><h2>Most Drafted</h2></div></div>
+      <div id="draftStatsList" class="data-list">Loading draft stats...</div>
     </section>
-
-    <section class="page-card social-section">
-      <div class="page-heading-row"><div><p class="eyebrow">Your circle</p><h2>Friends List</h2></div></div>
-      <div id="friendsList" class="data-list">Loading friends...</div>
+    <section class="page-card">
+      <div class="page-heading-row"><div><p class="eyebrow">Modes</p><h2>Mode Breakdown</h2></div></div>
+      <div id="modeStatsList" class="data-list">Loading mode stats...</div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

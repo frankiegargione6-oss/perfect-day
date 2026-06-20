@@ -866,6 +866,22 @@ const cityData = {
       "station": "KCLM",
       "type": "Coastal"
     }
+  ],
+  "Alaska / Hawaii / Territories": [
+    { "name": "Anchorage, AK", "abbr": "ANC", "station": "PANC", "type": "Alaska City" },
+    { "name": "Fairbanks, AK", "abbr": "FAI", "station": "PAFA", "type": "Interior Alaska" },
+    { "name": "Juneau, AK", "abbr": "JNU", "station": "PAJN", "type": "Coastal Alaska" },
+    { "name": "Nome, AK", "abbr": "OME", "station": "PAOM", "type": "Bering Sea" },
+    { "name": "Kodiak, AK", "abbr": "ADQ", "station": "PADQ", "type": "Island Alaska" },
+    { "name": "Utqiagvik, AK", "abbr": "BRW", "station": "PABR", "type": "Arctic" },
+    { "name": "Honolulu, HI", "abbr": "HNL", "station": "PHNL", "type": "Island City" },
+    { "name": "Hilo, HI", "abbr": "ITO", "station": "PHTO", "type": "Rainforest Coast" },
+    { "name": "Kahului, HI", "abbr": "OGG", "station": "PHOG", "type": "Island Valley" },
+    { "name": "Kona, HI", "abbr": "KOA", "station": "PHKO", "type": "Island Coast" },
+    { "name": "Guam", "abbr": "GUM", "station": "PGUM", "type": "Territory" },
+    { "name": "Saipan", "abbr": "GSN", "station": "PGSN", "type": "Territory" },
+    { "name": "Pago Pago, American Samoa", "abbr": "PPG", "station": "NSTU", "type": "Territory" },
+    { "name": "San Juan, PR", "abbr": "SJU", "station": "TJSJ", "type": "Caribbean" }
   ]
 };
 
@@ -1957,6 +1973,7 @@ function draft(label, item) {
     abbr: currentCity.abbr,
     city: currentCity.name,
     station: currentCity.station,
+    region: currentRegion,
     obsAge: currentWeather.obsAge
   };
   usedSlots.add(label);
@@ -2001,6 +2018,48 @@ function copyBuild() {
   }).catch(() => {
     alert(lines.join("\n"));
   });
+}
+
+
+function buildSocialText() {
+  const score = slots.every(slot => build[slot]) ? calculateEverydayScore() : null;
+  const lines = [`${els.mode.value}: My Perfect Day`];
+  if (score) lines.push(`Score: ${score.total}/100 — ${score.tier}`);
+  slots.forEach(slot => {
+    const item = build[slot];
+    if (item) lines.push(`${item.icon || ""} ${slot}: ${item.value}${item.detail ? ` (${item.detail})` : ""} · ${item.city}`);
+  });
+  lines.push("#PerfectDayGame");
+  return lines.join("\n");
+}
+
+async function shareResult() {
+  const text = buildSocialText();
+  const url = makeShareLink();
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "My Perfect Day", text, url });
+      return;
+    } catch (error) {
+      // user cancelled or share failed; fall through to clipboard
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(`${text}\n${url}`);
+    alert("Share text copied. Paste it into Instagram, Snapchat, X, Discord, or your group chat.");
+  } catch {
+    alert(`${text}\n${url}`);
+  }
+}
+
+async function copySocialPost() {
+  const text = `${buildSocialText()}\n${makeShareLink()}`;
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Social post copied.");
+  } catch {
+    alert(text);
+  }
 }
 
 async function downloadShareCard() {
@@ -2216,6 +2275,8 @@ els.downloadCardBtn.addEventListener("click", downloadShareCard);
 if (els.closeModalBtn) els.closeModalBtn.addEventListener("click", closeFinalModal);
 if (els.modalDownloadBtn) els.modalDownloadBtn.addEventListener("click", downloadShareCard);
 if (els.modalCopyBuildBtn) els.modalCopyBuildBtn.addEventListener("click", copyBuild);
+if (document.getElementById("modalShareBtn")) document.getElementById("modalShareBtn").addEventListener("click", shareResult);
+if (document.getElementById("modalCopySocialBtn")) document.getElementById("modalCopySocialBtn").addEventListener("click", copySocialPost);
 if (els.copyLinkBtn) els.copyLinkBtn.addEventListener("click", () => {
   const link = makeShareLink();
   if (els.shareLinkInput) els.shareLinkInput.value = link;
